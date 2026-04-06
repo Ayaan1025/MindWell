@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MindWell – Insights</title>
+  <style>
+    nav { margin-top: 10px; }
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 15px;
+      font-weight: bold;
+    }
+    nav a:hover { text-decoration: underline; }
+    #logout-btn {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.5);
+      padding: 5px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 13px;
+      margin-left: 15px;
+    }
+    #logout-btn:hover { background: rgba(255,255,255,0.35); }
+    #user-email { font-size: 12px; opacity: 0.75; margin-top: 6px; }
+    body { font-family: Arial; background: #f2f4f8; margin: 0; color: #333; }
+    header { background: #2f5d62; color: white; padding: 20px; text-align: center; }
+    main {
+      max-width: 800px;
+      margin: 30px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h2 { color: #2f5d62; margin-top: 0; }
+    .stat {
+      padding: 14px 18px;
+      margin: 10px 0;
+      background: #eef6f7;
+      border-left: 5px solid #2f5d62;
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 15px;
+    }
+    .stat-count {
+      font-size: 22px;
+      font-weight: bold;
+      color: #2f5d62;
+    }
+    .stat-calm { border-color: #1a6b62; }
+    .stat-okay { border-color: #1a4a8a; }
+    .stat-anxious { border-color: #8a4a00; }
+    .stat-overwhelmed { border-color: #8a1a1a; }
+    .bar-wrap {
+      background: #e0e0e0;
+      border-radius: 6px;
+      height: 10px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+    .bar {
+      height: 10px;
+      border-radius: 6px;
+      transition: width 0.5s ease;
+    }
+    .bar-calm { background: #c8f7f0; }
+    .bar-okay { background: #dbe9ff; }
+    .bar-anxious { background: #ffe0b2; }
+    .bar-overwhelmed { background: #ffcdd2; }
+    .summary {
+      margin-top: 24px;
+      padding: 16px;
+      background: #f9f9f9;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #555;
+      border: 1px solid #e0e0e0;
+    }
+    .summary strong { color: #2f5d62; }
+    #loading { color: #888; font-style: italic; }
+    #streak {
+      margin-top: 20px;
+      padding: 14px 18px;
+      background: #2f5d62;
+      color: white;
+      border-radius: 8px;
+      font-size: 15px;
+      text-align: center;
+    }
+    footer { text-align: center; padding: 15px; font-size: 12px; color: #666; }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="insights.html">Insights</a>
+      <a href="journal.html">Journal</a>
+      <a href="resources.html">Resources</a>
+      <button id="logout-btn" onclick="handleLogout()">Log Out</button>
+    </nav>
+    <h1>MindWell</h1>
+    <p>Mental Health – Emotional Check-In Interface</p>
+    <div id="user-email"></div>
+  </header>
+
+  <main>
+    <h2>Mood Insights</h2>
+    <div id="loading">Loading insights...</div>
+    <div id="stats"></div>
+    <div id="streak" style="display:none;"></div>
+    <div class="summary" id="summary" style="display:none;"></div>
+  </main>
+
+  <footer>© 2026 MindWell</footer>
+
+  <script type="module">
+    import { auth, db } from "./firebase-config.js";
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    onAuthStateChanged(auth, async user => {
+      if (!user) { window.location.href = "login.html"; return; }
+      document.getElementById("user-email").textContent = user.email;
+      await loadInsights(user.uid);
+    });
+
+    window.handleLogout = async function() {
+      await signOut(auth);
+      window.location.href = "login.html";
+    };
+
+    async function loadInsights(uid) {
+      const loadingEl = document.getElementById("loading");
+      const statsEl = document.getElementById("stats");
+      const summaryEl = document.getElementById("summary");
+      const streakEl = document.getElementById("streak");
+
+      try {
+        const snapshot = await getDocs(collection(db, "users", uid, "moods"));
+        loadingEl.style.display = "none";
+
+        let counts = { Calm: 0, Okay: 0, Anxious: 0, Overwhelmed: 0 };
+        let dates = [];
+
+        snapshot.forEach(d => {
+          const data = d.data();
+          if (counts[data.mood] !== undefined) counts[data.mood]++;
+          dates.push(d.id);
+        });
+
+        const total = Object.values(counts).reduce((a, b) => a + b, 0);
+
+        if (total === 0) {
+          statsEl.innerHTML = "<p style='color:#888;'>No entries yet. Log your first mood on the home page!</p>";
+          return;
+        }
+
+        // Mood stats with progress bars
+        statsEl.innerHTML = Object.entries(counts).map(([mood, count]) => {
+          const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+          const key = mood.toLowerCase();
+          return `
+            <div class="stat stat-${key}">
+              <div>
+                <div>${mood} days</div>
+                <div class="bar-wrap"><div class="bar bar-${key}" style="width:${pct}%"></div></div>
+              </div>
+              <div class="stat-count">${count}</div>
+            </div>
+          `;
+        }).join("");
+
+        // Streak calculation
+        dates.sort((a, b) => new Date(b) - new Date(a));
+        let streak = 0;
+        let check = new Date();
+        check.setHours(0,0,0,0);
+        for (let d of dates) {
+          const entryDate = new Date(d + "T00:00:00");
+          if (entryDate.toDateString() === check.toDateString()) {
+            streak++;
+            check.setDate(check.getDate() - 1);
+          } else break;
+        }
+        streakEl.style.display = "block";
+        streakEl.textContent = streak > 0
+          ? `🔥 ${streak}-day check-in streak! Keep it up.`
+          : "Start your streak — log today's mood!";
+
+        // Summary text
+        const dominant = Object.entries(counts).sort((a,b) => b[1]-a[1])[0][0];
+        const positiveRate = Math.round(((counts.Calm + counts.Okay) / total) * 100);
+        summaryEl.style.display = "block";
+        summaryEl.innerHTML = `
+          <strong>Summary:</strong> You've logged <strong>${total}</strong> total entries.
+          Your most common mood is <strong>${dominant}</strong>.
+          ${positiveRate >= 50
+            ? `<strong>${positiveRate}%</strong> of your days have been calm or okay — you're doing well.`
+            : `Consider reaching out for support or using the resources page — it's okay to ask for help.`}
+        `;
+      } catch(err) {
+        loadingEl.textContent = "Error loading insights.";
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>
