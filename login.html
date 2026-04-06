@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MindWell – Login</title>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f2f4f8;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    header {
+      background: #2f5d62;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    header h1 { margin: 0 0 5px 0; }
+    header p { margin: 0; font-size: 14px; opacity: 0.85; }
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+    .card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      padding: 36px 40px;
+      width: 100%;
+      max-width: 400px;
+    }
+    h2 {
+      color: #2f5d62;
+      margin: 0 0 24px 0;
+      text-align: center;
+    }
+    .tabs {
+      display: flex;
+      margin-bottom: 24px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    .tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      font-weight: bold;
+      color: #888;
+      transition: 0.2s;
+    }
+    .tab.active {
+      color: #2f5d62;
+      border-bottom: 3px solid #2f5d62;
+      margin-bottom: -2px;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      font-weight: bold;
+      color: #444;
+    }
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px 12px;
+      margin-bottom: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    input:focus {
+      outline: none;
+      border-color: #2f5d62;
+    }
+    .btn {
+      width: 100%;
+      padding: 13px;
+      background: #2f5d62;
+      color: white;
+      font-size: 15px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: #24484c; }
+    .error {
+      color: #c0392b;
+      font-size: 13px;
+      margin-top: 12px;
+      text-align: center;
+      min-height: 18px;
+    }
+    footer {
+      text-align: center;
+      padding: 15px;
+      font-size: 12px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>MindWell</h1>
+    <p>Mental Health – Emotional Check-In Interface</p>
+  </header>
+  <main>
+    <div class="card">
+      <h2>Welcome</h2>
+      <div class="tabs">
+        <div class="tab active" id="tab-login" onclick="switchTab('login')">Log In</div>
+        <div class="tab" id="tab-signup" onclick="switchTab('signup')">Sign Up</div>
+      </div>
+
+      <div id="form-login">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="you@email.com">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="••••••••">
+        <button class="btn" onclick="handleLogin()">Log In</button>
+      </div>
+
+      <div id="form-signup" style="display:none;">
+        <label>Email</label>
+        <input type="email" id="signup-email" placeholder="you@email.com">
+        <label>Password</label>
+        <input type="password" id="signup-password" placeholder="At least 6 characters">
+        <button class="btn" onclick="handleSignup()">Create Account</button>
+      </div>
+
+      <div class="error" id="auth-error"></div>
+    </div>
+  </main>
+  <footer>© 2026 MindWell</footer>
+
+  <script type="module">
+    import { auth } from "./firebase-config.js";
+    import {
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    // If already logged in, skip to home
+    onAuthStateChanged(auth, user => {
+      if (user) window.location.href = "index.html";
+    });
+
+    window.switchTab = function(tab) {
+      document.getElementById("tab-login").classList.toggle("active", tab === "login");
+      document.getElementById("tab-signup").classList.toggle("active", tab === "signup");
+      document.getElementById("form-login").style.display = tab === "login" ? "block" : "none";
+      document.getElementById("form-signup").style.display = tab === "signup" ? "block" : "none";
+      document.getElementById("auth-error").textContent = "";
+    };
+
+    window.handleLogin = async function() {
+      const email = document.getElementById("login-email").value.trim();
+      const password = document.getElementById("login-password").value;
+      const errorEl = document.getElementById("auth-error");
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        window.location.href = "index.html";
+      } catch (e) {
+        errorEl.textContent = friendlyError(e.code);
+      }
+    };
+
+    window.handleSignup = async function() {
+      const email = document.getElementById("signup-email").value.trim();
+      const password = document.getElementById("signup-password").value;
+      const errorEl = document.getElementById("auth-error");
+      try {
+        await createUserWithEmailAndPassword(auth, email, password);
+        window.location.href = "index.html";
+      } catch (e) {
+        errorEl.textContent = friendlyError(e.code);
+      }
+    };
+
+    function friendlyError(code) {
+      switch(code) {
+        case "auth/invalid-email": return "Invalid email address.";
+        case "auth/user-not-found": return "No account found with that email.";
+        case "auth/wrong-password": return "Incorrect password.";
+        case "auth/email-already-in-use": return "An account with that email already exists.";
+        case "auth/weak-password": return "Password must be at least 6 characters.";
+        case "auth/invalid-credential": return "Incorrect email or password.";
+        default: return "Something went wrong. Please try again.";
+      }
+    }
+  </script>
+</body>
+</html>
