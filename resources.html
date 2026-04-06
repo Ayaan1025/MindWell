@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>MindWell – Resources</title>
+  <style>
+    nav { margin-top: 10px; }
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 15px;
+      font-weight: bold;
+    }
+    nav a:hover { text-decoration: underline; }
+    #logout-btn {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.5);
+      padding: 5px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 13px;
+      margin-left: 15px;
+    }
+    #logout-btn:hover { background: rgba(255,255,255,0.35); }
+    body { font-family: Arial; background: #f2f4f8; margin: 0; }
+    header { background: #2f5d62; color: white; padding: 20px; text-align: center; }
+    main { max-width: 800px; margin: 30px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    h2 { color: #2f5d62; margin-top: 0; }
+    ul { line-height: 1.8; }
+    footer { text-align: center; padding: 15px; font-size: 12px; color: #666; }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="insights.html">Insights</a>
+      <a href="journal.html">Journal</a>
+      <a href="resources.html">Resources</a>
+      <button id="logout-btn" onclick="handleLogout()">Log Out</button>
+    </nav>
+    <h1>MindWell</h1>
+    <p>Mental Health – Emotional Check-In Interface</p>
+  </header>
+
+  <main>
+    <h2>Mental Health Resources</h2>
+    <ul>
+      <li>988 Suicide & Crisis Lifeline (US)</li>
+      <li>Grounding technique: 5-4-3-2-1 sensory method</li>
+      <li>Breathing exercise: 4-7-8 method</li>
+      <li>Reach out to trusted friends or professionals</li>
+    </ul>
+  </main>
+
+  <footer>© 2026 MindWell</footer>
+
+  <script type="module">
+    import { auth } from "./firebase-config.js";
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    onAuthStateChanged(auth, user => {
+      if (!user) window.location.href = "login.html";
+    });
+
+    window.handleLogout = async function() {
+      await signOut(auth);
+      window.location.href = "login.html";
+    };
+  </script>
+</body>
+</html>
