@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MindWell – Journal</title>
+  <style>
+    nav { margin-top: 10px; }
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 15px;
+      font-weight: bold;
+    }
+    nav a:hover { text-decoration: underline; }
+    #logout-btn {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.5);
+      padding: 5px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 13px;
+      margin-left: 15px;
+    }
+    #logout-btn:hover { background: rgba(255,255,255,0.35); }
+    #user-email { font-size: 12px; opacity: 0.75; margin-top: 6px; }
+    body { font-family: Arial; background: #f2f4f8; margin: 0; color: #333; }
+    header { background: #2f5d62; color: white; padding: 20px; text-align: center; }
+    main {
+      max-width: 800px;
+      margin: 30px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h2 { color: #2f5d62; margin-top: 0; }
+    .entry {
+      padding: 14px;
+      margin: 10px 0;
+      background: #eef6f7;
+      border-radius: 6px;
+      border-left: 5px solid #2f5d62;
+    }
+    .entry .date { font-weight: bold; color: #2f5d62; margin-bottom: 6px; }
+    .entry .mood { font-size: 13px; color: #555; margin-bottom: 4px; }
+    .entry .reflection { font-size: 14px; }
+    .mood-badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-left: 6px;
+    }
+    .badge-calm { background: #c8f7f0; color: #1a6b62; }
+    .badge-okay { background: #dbe9ff; color: #1a4a8a; }
+    .badge-anxious { background: #ffe0b2; color: #8a4a00; }
+    .badge-overwhelmed { background: #ffcdd2; color: #8a1a1a; }
+    #loading { color: #888; font-style: italic; }
+    #empty { color: #888; text-align: center; padding: 30px 0; display: none; }
+    footer { text-align: center; padding: 15px; font-size: 12px; color: #666; }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="insights.html">Insights</a>
+      <a href="journal.html">Journal</a>
+      <a href="resources.html">Resources</a>
+      <button id="logout-btn" onclick="handleLogout()">Log Out</button>
+    </nav>
+    <h1>MindWell</h1>
+    <p>Mental Health – Emotional Check-In Interface</p>
+    <div id="user-email"></div>
+  </header>
+
+  <main>
+    <h2>Journal History</h2>
+    <div id="loading">Loading entries...</div>
+    <div id="empty">No journal entries yet. Head to the home page to log your first mood!</div>
+    <div id="entries"></div>
+  </main>
+
+  <footer>© 2026 MindWell</footer>
+
+  <script type="module">
+    import { auth, db } from "./firebase-config.js";
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    onAuthStateChanged(auth, async user => {
+      if (!user) { window.location.href = "login.html"; return; }
+      document.getElementById("user-email").textContent = user.email;
+      await loadJournal(user.uid);
+    });
+
+    window.handleLogout = async function() {
+      await signOut(auth);
+      window.location.href = "login.html";
+    };
+
+    async function loadJournal(uid) {
+      const entriesDiv = document.getElementById("entries");
+      const loadingEl = document.getElementById("loading");
+      const emptyEl = document.getElementById("empty");
+
+      try {
+        const snapshot = await getDocs(collection(db, "users", uid, "moods"));
+        loadingEl.style.display = "none";
+
+        let entries = [];
+        snapshot.forEach(d => entries.push({ date: d.id, ...d.data() }));
+        entries.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        if (entries.length === 0) {
+          emptyEl.style.display = "block";
+          return;
+        }
+
+        entriesDiv.innerHTML = entries.map(e => {
+          const badgeClass = "badge-" + e.mood.toLowerCase();
+          return `
+            <div class="entry">
+              <div class="date">${e.date} <span class="mood-badge ${badgeClass}">${e.mood}</span></div>
+              <div class="reflection">${e.reflection}</div>
+            </div>
+          `;
+        }).join("");
+      } catch(err) {
+        loadingEl.textContent = "Error loading entries.";
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>
