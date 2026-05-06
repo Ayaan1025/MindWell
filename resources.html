@@ -28,8 +28,74 @@
     header { background: #2f5d62; color: white; padding: 20px; text-align: center; }
     main { max-width: 800px; margin: 30px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
     h2 { color: #2f5d62; margin-top: 0; }
-    ul { line-height: 1.8; }
     footer { text-align: center; padding: 15px; font-size: 12px; color: #666; }
+
+    /* Accordion styles */
+    .accordion {
+      border: 1px solid #d0e4e6;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    .accordion-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 18px;
+      background: #eef6f7;
+      cursor: pointer;
+      font-weight: bold;
+      color: #2f5d62;
+      font-size: 15px;
+      transition: background 0.2s;
+      border: none;
+      width: 100%;
+      text-align: left;
+    }
+    .accordion-header:hover { background: #d9eef0; }
+    .accordion-header .icon {
+      font-size: 18px;
+      transition: transform 0.3s ease;
+      flex-shrink: 0;
+      margin-left: 10px;
+    }
+    .accordion-header.open .icon {
+      transform: rotate(180deg);
+    }
+    .accordion-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease, padding 0.3s ease;
+      background: white;
+      padding: 0 18px;
+      font-size: 14px;
+      color: #444;
+      line-height: 1.7;
+    }
+    .accordion-body.open {
+      max-height: 400px;
+      padding: 14px 18px;
+    }
+    .accordion-body a {
+      color: #2f5d62;
+      font-weight: bold;
+    }
+    .accordion-body ol, .accordion-body ul {
+      margin: 8px 0 4px 0;
+      padding-left: 20px;
+    }
+    .accordion-body li { margin-bottom: 4px; }
+    .resource-tag {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: #c8f7f0;
+      color: #1a6b62;
+      font-weight: bold;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
   </style>
 </head>
 <body>
@@ -47,12 +113,82 @@
 
   <main>
     <h2>Mental Health Resources</h2>
-    <ul>
-      <li>988 Suicide & Crisis Lifeline (US)</li>
-      <li>Grounding technique: 5-4-3-2-1 sensory method</li>
-      <li>Breathing exercise: 4-7-8 method</li>
-      <li>Reach out to trusted friends or professionals</li>
-    </ul>
+
+    <!-- 988 Crisis Lifeline -->
+    <div class="accordion">
+      <button class="accordion-header" onclick="toggleAccordion(this)">
+        <span>📞 988 Suicide &amp; Crisis Lifeline (US) <span class="resource-tag">Crisis Support</span></span>
+        <span class="icon">▾</span>
+      </button>
+      <div class="accordion-body">
+        <p>The 988 Suicide &amp; Crisis Lifeline provides free, confidential support 24/7 for people in distress.</p>
+        <ul>
+          <li><strong>Call or text:</strong> 988</li>
+          <li><strong>Chat:</strong> <a href="https://988lifeline.org" target="_blank">988lifeline.org</a></li>
+          <li>Available 24 hours a day, 7 days a week</li>
+          <li>Staffed by trained crisis counselors</li>
+          <li>Also available for those worried about someone else</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 5-4-3-2-1 Grounding -->
+    <div class="accordion">
+      <button class="accordion-header" onclick="toggleAccordion(this)">
+        <span>🌿 Grounding Technique: 5-4-3-2-1 Sensory Method <span class="resource-tag">Anxiety Relief</span></span>
+        <span class="icon">▾</span>
+      </button>
+      <div class="accordion-body">
+        <p>This technique helps bring your attention to the present moment when you feel anxious or overwhelmed. Work through each sense slowly:</p>
+        <ol>
+          <li><strong>5 things you can SEE</strong> – Look around and name 5 things you can see right now.</li>
+          <li><strong>4 things you can TOUCH</strong> – Notice 4 things you can physically feel (your feet on the floor, the texture of your clothes).</li>
+          <li><strong>3 things you can HEAR</strong> – Listen for 3 distinct sounds around you.</li>
+          <li><strong>2 things you can SMELL</strong> – Notice 2 scents, or recall 2 smells you enjoy.</li>
+          <li><strong>1 thing you can TASTE</strong> – Notice any taste in your mouth, or think of a food you enjoy.</li>
+        </ol>
+        <p>Repeat as needed. This works best when done slowly and deliberately.</p>
+      </div>
+    </div>
+
+    <!-- 4-7-8 Breathing -->
+    <div class="accordion">
+      <button class="accordion-header" onclick="toggleAccordion(this)">
+        <span>🫁 Breathing Exercise: 4-7-8 Method <span class="resource-tag">Stress Reduction</span></span>
+        <span class="icon">▾</span>
+      </button>
+      <div class="accordion-body">
+        <p>The 4-7-8 breathing technique activates your body's relaxation response and can help reduce anxiety quickly. Follow these steps:</p>
+        <ol>
+          <li>Sit comfortably and close your eyes.</li>
+          <li><strong>Inhale</strong> through your nose for <strong>4 seconds</strong>.</li>
+          <li><strong>Hold</strong> your breath for <strong>7 seconds</strong>.</li>
+          <li><strong>Exhale</strong> slowly through your mouth for <strong>8 seconds</strong>.</li>
+          <li>Repeat this cycle <strong>3–4 times</strong>.</li>
+        </ol>
+        <p>Tip: Place one hand on your belly to ensure you're breathing deeply from the diaphragm, not shallowly from the chest.</p>
+      </div>
+    </div>
+
+    <!-- Reach Out -->
+    <div class="accordion">
+      <button class="accordion-header" onclick="toggleAccordion(this)">
+        <span>🤝 Reach Out to Trusted Friends or Professionals <span class="resource-tag">Social Support</span></span>
+        <span class="icon">▾</span>
+      </button>
+      <div class="accordion-body">
+        <p>Talking to someone you trust can make a significant difference. Here are some ways to reach out:</p>
+        <ul>
+          <li><strong>Friends &amp; family:</strong> Send a simple text — "I've been struggling lately, can we talk?" is enough.</li>
+          <li><strong>Therapist or counselor:</strong> Look for licensed therapists via <a href="https://www.psychologytoday.com/us/therapists" target="_blank">Psychology Today</a> or your insurance provider.</li>
+          <li><strong>School counselor:</strong> If you're a student, your institution likely offers free counseling services.</li>
+          <li><strong>Crisis Text Line:</strong> Text HOME to <strong>741741</strong> to connect with a crisis counselor via text.</li>
+          <li><strong>Online therapy:</strong> Services like BetterHelp or Talkspace offer flexible, remote options.</li>
+        </ul>
+        <p>Asking for help is a sign of strength, not weakness.</p>
+      </div>
+    </div>
+
   </main>
 
   <footer>© 2026 MindWell</footer>
@@ -69,6 +205,23 @@
       await signOut(auth);
       window.location.href = "login.html";
     };
+  </script>
+
+  <script>
+    function toggleAccordion(btn) {
+      const body = btn.nextElementSibling;
+      const isOpen = btn.classList.contains("open");
+
+      // Close all
+      document.querySelectorAll(".accordion-header").forEach(h => h.classList.remove("open"));
+      document.querySelectorAll(".accordion-body").forEach(b => b.classList.remove("open"));
+
+      // Open clicked one (unless it was already open)
+      if (!isOpen) {
+        btn.classList.add("open");
+        body.classList.add("open");
+      }
+    }
   </script>
 </body>
 </html>
