@@ -194,7 +194,10 @@
 
     let currentUser = null;
     let selectedMood = "";
-    let selectedDate = new Date().toISOString().split("T")[0];
+
+    // Fixed: use local date methods instead of toISOString() to avoid UTC timezone shift
+    const _today = new Date();
+    let selectedDate = `${_today.getFullYear()}-${String(_today.getMonth()+1).padStart(2,'0')}-${String(_today.getDate()).padStart(2,'0')}`;
 
     // Auth gate — redirect to login if not signed in
     onAuthStateChanged(auth, async user => {
@@ -221,7 +224,9 @@
       const month = now.getMonth();
       const firstDay = new Date(year, month, 1).getDay();
       const totalDays = new Date(year, month + 1, 0).getDate();
-      const todayStr = now.toISOString().split("T")[0];
+
+      // Fixed: use local date methods instead of toISOString() to avoid UTC timezone shift
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
 
       // Fetch all mood docs for this user for the month
       const moodsRef = collection(db, "users", currentUser.uid, "moods");
