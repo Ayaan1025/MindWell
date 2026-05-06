@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>MindWell – Insights</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     nav { margin-top: 10px; }
     nav a {
@@ -36,6 +37,7 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
     h2 { color: #2f5d62; margin-top: 0; }
+    h3 { color: #2f5d62; margin: 24px 0 10px 0; font-size: 15px; }
     .stat {
       padding: 14px 18px;
       margin: 10px 0;
@@ -93,6 +95,32 @@
       text-align: center;
     }
     footer { text-align: center; padding: 15px; font-size: 12px; color: #666; }
+
+    .chart-section {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #e8f0f1;
+    }
+    .chart-box {
+      background: #f9fdfd;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 20px;
+      border: 1px solid #e0eef0;
+    }
+    .chart-box canvas {
+      max-height: 260px;
+    }
+    .chart-row {
+      display: flex;
+      gap: 16px;
+    }
+    .chart-row .chart-box {
+      flex: 1;
+    }
+    @media (max-width: 560px) {
+      .chart-row { flex-direction: column; }
+    }
   </style>
 </head>
 <body>
@@ -114,6 +142,24 @@
     <div id="loading">Loading insights...</div>
     <div id="stats"></div>
     <div id="streak" style="display:none;"></div>
+
+    <div class="chart-section" id="chart-section" style="display:none;">
+      <h3>Mood Over Time</h3>
+      <div class="chart-box">
+        <canvas id="lineChart"></canvas>
+      </div>
+      <div class="chart-row">
+        <div class="chart-box">
+          <h3 style="margin-top:0;">Mood Breakdown</h3>
+          <canvas id="doughnutChart"></canvas>
+        </div>
+        <div class="chart-box">
+          <h3 style="margin-top:0;">Entries per Mood</h3>
+          <canvas id="barChart"></canvas>
+        </div>
+      </div>
+    </div>
+
     <div class="summary" id="summary" style="display:none;"></div>
   </main>
 
@@ -135,23 +181,38 @@
       window.location.href = "login.html";
     };
 
+    const moodScore = { Calm: 4, Okay: 3, Anxious: 2, Overwhelmed: 1 };
+    const moodColors = {
+      Calm: "#c8f7f0",
+      Okay: "#dbe9ff",
+      Anxious: "#ffe0b2",
+      Overwhelmed: "#ffcdd2"
+    };
+    const moodBorderColors = {
+      Calm: "#1a6b62",
+      Okay: "#1a4a8a",
+      Anxious: "#8a4a00",
+      Overwhelmed: "#8a1a1a"
+    };
+
     async function loadInsights(uid) {
       const loadingEl = document.getElementById("loading");
       const statsEl = document.getElementById("stats");
       const summaryEl = document.getElementById("summary");
       const streakEl = document.getElementById("streak");
+      const chartSection = document.getElementById("chart-section");
 
       try {
         const snapshot = await getDocs(collection(db, "users", uid, "moods"));
         loadingEl.style.display = "none";
 
         let counts = { Calm: 0, Okay: 0, Anxious: 0, Overwhelmed: 0 };
-        let dates = [];
+        let entries = []; // { date, mood }
 
         snapshot.forEach(d => {
           const data = d.data();
           if (counts[data.mood] !== undefined) counts[data.mood]++;
-          dates.push(d.id);
+          entries.push({ date: d.id, mood: data.mood });
         });
 
         const total = Object.values(counts).reduce((a, b) => a + b, 0);
@@ -167,7 +228,7 @@
           const key = mood.toLowerCase();
           return `
             <div class="stat stat-${key}">
-              <div>
+              <div style="flex:1;">
                 <div>${mood} days</div>
                 <div class="bar-wrap"><div class="bar bar-${key}" style="width:${pct}%"></div></div>
               </div>
@@ -176,11 +237,10 @@
           `;
         }).join("");
 
-        // Streak calculation
-        dates.sort((a, b) => new Date(b) - new Date(a));
+        const dates = entries.map(e => e.date).sort((a, b) => new Date(b) - new Date(a));
         let streak = 0;
         let check = new Date();
-        check.setHours(0,0,0,0);
+        check.setHours(0, 0, 0, 0);
         for (let d of dates) {
           const entryDate = new Date(d + "T00:00:00");
           if (entryDate.toDateString() === check.toDateString()) {
@@ -192,9 +252,8 @@
         streakEl.textContent = streak > 0
           ? `🔥 ${streak}-day check-in streak! Keep it up.`
           : "Start your streak — log today's mood!";
-
-        // Summary text
-        const dominant = Object.entries(counts).sort((a,b) => b[1]-a[1])[0][0];
+        
+        const dominant = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
         const positiveRate = Math.round(((counts.Calm + counts.Okay) / total) * 100);
         summaryEl.style.display = "block";
         summaryEl.innerHTML = `
@@ -204,10 +263,120 @@
             ? `<strong>${positiveRate}%</strong> of your days have been calm or okay — you're doing well.`
             : `Consider reaching out for support or using the resources page — it's okay to ask for help.`}
         `;
-      } catch(err) {
+
+        chartSection.style.display = "block";
+        buildCharts(entries, counts);
+
+      } catch (err) {
         loadingEl.textContent = "Error loading insights.";
         console.error(err);
       }
+    }
+
+    function buildCharts(entries, counts) {
+
+      const sorted = [...entries].sort((a, b) => new Date(a.date) - new Date(b.date));
+      const lineLabels = sorted.map(e => e.date);
+      const lineData = sorted.map(e => moodScore[e.mood]);
+      const linePointColors = sorted.map(e => moodBorderColors[e.mood]);
+
+      new Chart(document.getElementById("lineChart"), {
+        type: "line",
+        data: {
+          labels: lineLabels,
+          datasets: [{
+            label: "Mood",
+            data: lineData,
+            borderColor: "#2f5d62",
+            backgroundColor: "rgba(47, 93, 98, 0.08)",
+            pointBackgroundColor: linePointColors,
+            pointBorderColor: linePointColors,
+            pointRadius: 6,
+            pointHoverRadius: 8,
+            tension: 0.3,
+            fill: true,
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: ctx => {
+                  const scoreToMood = { 4: "Calm", 3: "Okay", 2: "Anxious", 1: "Overwhelmed" };
+                  return " " + (scoreToMood[ctx.parsed.y] || "");
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              min: 0.5,
+              max: 4.5,
+              ticks: {
+                stepSize: 1,
+                callback: val => ({ 1: "Overwhelmed", 2: "Anxious", 3: "Okay", 4: "Calm" }[val] || "")
+              },
+              grid: { color: "#f0f0f0" }
+            },
+            x: {
+              ticks: { maxTicksLimit: 10, maxRotation: 45 },
+              grid: { display: false }
+            }
+          }
+        }
+      });
+
+      const doughnutLabels = Object.keys(counts);
+      new Chart(document.getElementById("doughnutChart"), {
+        type: "doughnut",
+        data: {
+          labels: doughnutLabels,
+          datasets: [{
+            data: doughnutLabels.map(m => counts[m]),
+            backgroundColor: doughnutLabels.map(m => moodColors[m]),
+            borderColor: doughnutLabels.map(m => moodBorderColors[m]),
+            borderWidth: 1.5
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: { font: { size: 12 }, padding: 12 }
+            }
+          }
+        }
+      });
+
+      new Chart(document.getElementById("barChart"), {
+        type: "bar",
+        data: {
+          labels: Object.keys(counts),
+          datasets: [{
+            label: "Days",
+            data: Object.values(counts),
+            backgroundColor: Object.keys(counts).map(m => moodColors[m]),
+            borderColor: Object.keys(counts).map(m => moodBorderColors[m]),
+            borderWidth: 1.5,
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { stepSize: 1 },
+              grid: { color: "#f0f0f0" }
+            },
+            x: { grid: { display: false } }
+          }
+        }
+      });
     }
   </script>
 </body>
