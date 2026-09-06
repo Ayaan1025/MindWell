@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MindWell – Companion</title>
+  <link rel="stylesheet" href="theme.css">
+  <script src="intro.js"></script>
+  <style>
+    main { display: flex; flex-direction: column; }
+
+    .disclaimer {
+      font-size: 12.5px;
+      color: var(--text-dim);
+      background: rgba(255,255,255,0.035);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 11px 14px;
+      margin-bottom: 18px;
+      line-height: 1.6;
+    }
+    .disclaimer a { color: var(--accent-warm); }
+
+    /* ---- Gate: shown until the model is downloaded ---- */
+    .gate { text-align: center; padding: 18px 4px 8px; }
+    .gate h3 { margin: 0 0 10px; font-size: 17px; color: var(--text); }
+    .gate p {
+      color: var(--text-muted);
+      font-size: 14px;
+      max-width: 460px;
+      margin: 0 auto 16px;
+    }
+    .privacy-note {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12.5px;
+      color: var(--accent-warm);
+      background: var(--accent-warm-soft);
+      border: 1px solid rgba(232,198,154,0.3);
+      border-radius: 999px;
+      padding: 5px 14px;
+      margin-bottom: 20px;
+    }
+
+    .model-picks {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .model-pick {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 13px 18px;
+      cursor: pointer;
+      font-family: inherit;
+      color: var(--text-muted);
+      min-width: 140px;
+      transition: background 0.25s ease, border-color 0.25s ease,
+                  transform 0.25s ease, color 0.25s ease;
+    }
+    .model-pick:hover {
+      background: rgba(255,255,255,0.11);
+      border-color: var(--glass-border-bright);
+      color: var(--text);
+      transform: translateY(-2px);
+    }
+    .model-pick .pick-label { display: block; font-size: 15px; font-weight: 500; }
+    .model-pick .pick-size { display: block; font-size: 12px; color: var(--text-dim); margin-top: 3px; }
+
+    /* ---- Download progress ---- */
+    .loading { display: none; text-align: center; padding: 10px 0 4px; }
+    .loading.on { display: block; }
+    .progress-track {
+      background: rgba(255,255,255,0.08);
+      border-radius: 6px;
+      height: 8px;
+      overflow: hidden;
+      max-width: 420px;
+      margin: 14px auto 10px;
+    }
+    .progress-fill {
+      height: 8px;
+      width: 0%;
+      border-radius: 6px;
+      background: linear-gradient(90deg, rgba(201,179,242,0.6), var(--accent-warm));
+      transition: width 0.35s ease;
+    }
+    .progress-text {
+      font-size: 12.5px;
+      color: var(--text-dim);
+      min-height: 18px;
+      word-break: break-word;
+    }
+
+    /* ---- Unsupported browser ---- */
+    .unsupported {
+      display: none;
+      padding: 18px;
+      border-radius: var(--radius-sm);
+      background: rgba(220,154,154,0.1);
+      border: 1px solid rgba(220,154,154,0.32);
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.65;
+    }
+    .unsupported.on { display: block; }
+    .unsupported strong { color: var(--danger); }
+
+    /* ---- Transcript ---- */
+    .chat { display: none; flex-direction: column; }
+    .chat.on { display: flex; }
+
+    #transcript {
+      min-height: 300px;
+      max-height: 52vh;
+      overflow-y: auto;
+      padding: 4px 4px 8px;
+      margin-bottom: 14px;
+    }
+    .msg {
+      max-width: 82%;
+      padding: 11px 15px;
+      border-radius: 14px;
+      margin-bottom: 11px;
+      font-size: 14px;
+      line-height: 1.62;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      animation: fade-up 0.45s cubic-bezier(0.22,0.61,0.36,1) both;
+    }
+    .msg.user {
+      margin-left: auto;
+      background: var(--accent-soft);
+      border: 1px solid rgba(201,179,242,0.3);
+      color: var(--text);
+      border-bottom-right-radius: 5px;
+    }
+    .msg.bot {
+      margin-right: auto;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      color: var(--text-muted);
+      border-bottom-left-radius: 5px;
+    }
+    .msg.bot.thinking { color: var(--text-dim); font-style: italic; }
+
+    /* Crisis card — always additive, never replaces the model's reply. */
+    .crisis-card {
+      margin: 4px 0 13px;
+      padding: 15px 17px;
+      border-radius: var(--radius-sm);
+      background: rgba(232,198,154,0.1);
+      border: 1px solid rgba(232,198,154,0.42);
+      font-size: 13.5px;
+      line-height: 1.7;
+      color: var(--text-muted);
+      animation: fade-up 0.5s cubic-bezier(0.22,0.61,0.36,1) both;
+    }
+    .crisis-card strong { color: var(--accent-warm); display: block; margin-bottom: 5px; font-size: 14px; }
+    .crisis-card a { color: var(--accent-warm); font-weight: 500; }
+
+    /* ---- Composer ---- */
+    .composer { display: flex; gap: 10px; align-items: flex-end; }
+    #chat-input {
+      flex: 1;
+      height: 52px;
+      max-height: 140px;
+      padding: 14px 15px;
+      font-size: 14px;
+      resize: none;
+      line-height: 1.5;
+    }
+    #send-btn {
+      padding: 0 22px;
+      height: 52px;
+      background: var(--accent-soft);
+      border: 1px solid rgba(201,179,242,0.4);
+      color: var(--accent);
+      font-size: 14px;
+      font-family: inherit;
+      font-weight: 500;
+      border-radius: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.25s ease, border-color 0.25s ease,
+                  box-shadow 0.25s ease, opacity 0.25s ease;
+    }
+    #send-btn:hover:not(:disabled) {
+      background: rgba(201,179,242,0.26);
+      border-color: rgba(201,179,242,0.65);
+      box-shadow: 0 0 20px rgba(201,179,242,0.18);
+    }
+    #send-btn:disabled { opacity: 0.45; cursor: default; }
+
+    .chat-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--text-dim);
+      gap: 12px;
+    }
+    .linkish {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-family: inherit;
+      font-size: 12px;
+      cursor: pointer;
+      padding: 0;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .linkish:hover { color: var(--text-muted); }
+
+
+    /* ---- Luna, the companion mascot ---- */
+    .mascot-hero {
+      display: flex;
+      justify-content: center;
+      margin: 4px 0 2px;
+    }
+    .mascot-hero .mascot { width: 132px; height: 154px; }
+    .mascot-hero.hidden { display: none; }
+
+    .companion-strip {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--glass-border);
+    }
+    .companion-strip .mascot { width: 40px; height: 47px; flex-shrink: 0; }
+    .strip-name { font-size: 14px; font-weight: 500; color: var(--text); }
+    .strip-sub { font-size: 11.5px; color: var(--text-dim); }
+
+    /* Parts */
+    .mw-shadow { fill: rgba(10, 6, 18, 0.45); animation: mw-shadow 4s ease-in-out infinite alternate; }
+    .mw-stem   { stroke: var(--accent); stroke-width: 2.5; stroke-linecap: round; }
+    .mw-tip    { fill: var(--accent-warm); animation: mw-pulse 3.2s ease-in-out infinite alternate; }
+    .mw-visor  { fill: #241a33; }
+    .mw-eye    { fill: var(--accent-warm); }
+    .mw-smile  { fill: none; stroke: var(--accent-warm); stroke-width: 2; stroke-linecap: round; opacity: 0.9; }
+    .mw-cheek  { fill: #e29aa8; opacity: 0.4; }
+
+    /* Gentle bob for the whole body. */
+    .mw-float {
+      transform-box: view-box;
+      transform-origin: 60px 116px;
+      animation: mw-float 4s ease-in-out infinite alternate;
+    }
+    @keyframes mw-float {
+      from { transform: translateY(0)    rotate(-1.2deg); }
+      to   { transform: translateY(-7px) rotate(1.2deg); }
+    }
+    @keyframes mw-shadow {
+      from { transform: scaleX(1);    opacity: 0.45; }
+      to   { transform: scaleX(0.86); opacity: 0.28; }
+    }
+    .mw-shadow { transform-box: view-box; transform-origin: 60px 129px; }
+
+    @keyframes mw-pulse {
+      from { opacity: 0.75; filter: drop-shadow(0 0 4px rgba(232,198,154,0.5)); }
+      to   { opacity: 1;    filter: drop-shadow(0 0 13px rgba(232,198,154,0.85)); }
+    }
+
+    /* The wave. Pivots at the shoulder joint, not the element centre. */
+    .mw-arm-wave {
+      transform-box: view-box;
+      transform-origin: 96.5px 70px;
+      animation: mw-wave 2.4s ease-in-out infinite;
+    }
+    /* Swings outward, away from the head — an inward wave hides the hand
+       behind the body. */
+    @keyframes mw-wave {
+      0%, 64%, 100% { transform: rotate(0deg); }
+      9%            { transform: rotate(25deg); }
+      19%           { transform: rotate(3deg); }
+      29%           { transform: rotate(25deg); }
+      39%           { transform: rotate(3deg); }
+      52%           { transform: rotate(13deg); }
+    }
+
+    /* In the chat strip Luna waves a few times, then settles — a permanent
+       wave would pull focus away from the conversation. */
+    .companion-strip .mw-arm-wave { animation-iteration-count: 3; }
+
+    .mw-eye { transform-box: view-box; }
+    .mw-eye-l { transform-origin: 49px 65px; animation: mw-blink 6.5s ease-in-out infinite; }
+    .mw-eye-r { transform-origin: 71px 65px; animation: mw-blink 6.5s ease-in-out infinite; }
+    @keyframes mw-blink {
+      0%, 90%, 100% { transform: scaleY(1); }
+      94%           { transform: scaleY(0.12); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .mw-float, .mw-arm-wave, .mw-eye, .mw-tip, .mw-shadow { animation: none !important; }
+    }
+
+    @media (max-width: 620px) {
+      .msg { max-width: 92%; }
+      #transcript { max-height: 46vh; }
+      #send-btn { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="cosmos" aria-hidden="true">
+    <span class="orb orb-a"></span>
+    <span class="orb orb-b"></span>
+    <span class="orb orb-c"></span>
+  </div>
+  <div class="mood-wash" aria-hidden="true"></div>
+
+  <header class="fade-up">
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="chat.html">Companion</a>
+      <a href="insights.html">Insights</a>
+      <a href="journal.html">Journal</a>
+      <a href="resources.html">Resources</a>
+      <button id="logout-btn" onclick="handleLogout()">Log Out</button>
+    </nav>
+    <h1>MindWell</h1>
+    <p>Mental Health – Emotional Check-In Interface</p>
+    <div id="user-email"></div>
+  </header>
+
+  <main class="fade-up d2">
+    <h2>Companion</h2>
+
+    <div class="disclaimer">
+      A reflective companion, not a therapist. It cannot diagnose, prescribe, or
+      handle emergencies. If you are in crisis, call or text
+      <strong>988</strong> (US Suicide &amp; Crisis Lifeline) or see
+      <a href="resources.html">Resources</a>.
+    </div>
+
+    <div class="mascot-hero" id="mascot-hero"></div>
+
+    <!-- WebGPU missing -->
+    <div class="unsupported" id="unsupported">
+      <strong>This browser can't run the companion.</strong>
+      It needs WebGPU to run the model on your own device. Chrome or Edge
+      (version 113+) work; Safari 18+ works; Firefox support is still uneven.
+      Everything else in MindWell works fine here — only this page needs it.
+    </div>
+
+    <!-- Gate -->
+    <div class="gate" id="gate">
+      <div class="privacy-note">🔒 On-device options keep every word on this machine</div>
+      <h3>Choose a companion</h3>
+      <p>
+        On-device models download once and are cached by your browser, so the
+        wait only happens the first time — and nothing you type ever leaves
+        this machine. The cloud option skips the download and uses a much
+        larger model, but sends the conversation to a server.
+      </p>
+      <div class="model-picks" id="model-picks"></div>
+    </div>
+
+    <!-- Download progress -->
+    <div class="loading" id="loading">
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="progress-text" id="progress-text">Preparing…</div>
+    </div>
+
+    <!-- Chat -->
+    <div class="chat" id="chat">
+      <div class="companion-strip">
+        <div id="mascot-mini"></div>
+        <div>
+          <div class="strip-name">Luna</div>
+          <div class="strip-sub">running on your device</div>
+        </div>
+      </div>
+      <div id="transcript"></div>
+      <div class="composer">
+        <textarea id="chat-input" placeholder="What's on your mind?" rows="1"></textarea>
+        <button id="send-btn" onclick="sendMessage()">Send</button>
+      </div>
+      <div class="chat-meta">
+        <span id="context-note"></span>
+        <button class="linkish" onclick="resetChat()">Clear conversation</button>
+      </div>
+    </div>
+  </main>
+
+  <footer>© 2026 MindWell</footer>
+
+  <script type="module">
+    import { auth, db } from "./firebase-config.js";
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import * as local from "./companion.js";
+    import * as remote from "./companion-remote.js";
+    import { buildSystemPrompt, detectCrisis } from "./companion.js";
+    import { REMOTE_ENDPOINT } from "./config.js";
+    import { mascotSVG } from "./mascot.js";
+
+    // Which backend is answering. Chosen in the gate; the rest of the page
+    // never needs to know which one it got.
+    let provider = local;
+
+    document.getElementById("mascot-hero").innerHTML = mascotSVG();
+    document.getElementById("mascot-mini").innerHTML = mascotSVG();
+
+    const CONTEXT_DAYS = 14;
+    const MAX_TURNS = 12;   // trimmed history sent to the model each turn
+
+    let systemPrompt = buildSystemPrompt(null);
+    let history = [];       // { role, content }, excludes the system message
+    let busy = false;
+
+    onAuthStateChanged(auth, async user => {
+      if (!user) { window.location.href = "login.html"; return; }
+      if (window.MindWellIntro) window.MindWellIntro.play({ hello: "Welcome back", name: "MindWell" });
+      document.getElementById("user-email").textContent = user.email;
+
+      await loadJournalContext(user.uid);
+      initGate();
+    });
+
+    window.handleLogout = async function() {
+      await signOut(auth);
+      window.location.href = "login.html";
+    };
+
+    /* ---- Journal context -------------------------------------------------- */
+
+    async function loadJournalContext(uid) {
+      const note = document.getElementById("context-note");
+      try {
+        const snapshot = await getDocs(collection(db, "users", uid, "moods"));
+        const entries = [];
+        snapshot.forEach(d => entries.push({ date: d.id, ...d.data() }));
+
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - CONTEXT_DAYS);
+
+        const recent = entries
+          .filter(e => new Date(e.date + "T00:00:00") >= cutoff)
+          .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        systemPrompt = buildSystemPrompt(recent);
+        note.textContent = recent.length
+          ? "Aware of your last " + recent.length +
+            (recent.length === 1 ? " check-in" : " check-ins")
+          : "No recent check-ins to draw on";
+      } catch (e) {
+        console.error(e);
+        note.textContent = "Journal context unavailable";
+      }
+    }
+
+    /* ---- Gate and model loading ------------------------------------------ */
+
+    function pickButton(label, sub, onClick) {
+      const btn = document.createElement("button");
+      btn.className = "model-pick";
+      btn.innerHTML = '<span class="pick-label"></span><span class="pick-size"></span>';
+      btn.querySelector(".pick-label").textContent = label;
+      btn.querySelector(".pick-size").textContent = sub;
+      btn.onclick = onClick;
+      return btn;
+    }
+
+    async function initGate() {
+      const picks = document.getElementById("model-picks");
+      const canLocal = local.isSupported();
+      const canRemote = remote.isSupported();
+
+      if (!canLocal && !canRemote) {
+        document.getElementById("gate").style.display = "none";
+        document.getElementById("unsupported").classList.add("on");
+        return;
+      }
+
+      picks.innerHTML = "";
+
+      if (canLocal) {
+        let models = [];
+        try {
+          models = await local.availableModels();
+        } catch (e) {
+          console.error(e);
+        }
+        models.forEach(m => {
+          const size = m.vram ? "~" + (m.vram / 1024).toFixed(1) + " GB download" : "on device";
+          picks.appendChild(pickButton(m.label, size, () => startLoad(local, m.id)));
+        });
+      }
+
+      if (canRemote) {
+        picks.appendChild(
+          pickButton("Cloud", "larger model, no download",
+                     () => startLoad(remote, "remote")));
+      }
+
+      // WebGPU is missing but a Worker is configured: explain the gap rather
+      // than silently offering only one option.
+      if (!canLocal && canRemote) {
+        const panel = document.getElementById("unsupported");
+        panel.innerHTML =
+          "<strong>On-device models aren't available in this browser.</strong>" +
+          " They need WebGPU — Chrome or Edge 113+, or Safari 18+. The cloud" +
+          " option below works here, but sends your conversation to a server" +
+          " instead of keeping it on this machine.";
+        panel.classList.add("on");
+      }
+
+      if (!picks.children.length) {
+        picks.innerHTML =
+          "<p style='color:var(--text-dim);'>No companion available. " +
+          "Check your connection and reload.</p>";
+      }
+    }
+
+    async function startLoad(chosen, modelId) {
+      provider = chosen;
+      const gate = document.getElementById("gate");
+      const loading = document.getElementById("loading");
+      const fill = document.getElementById("progress-fill");
+      const text = document.getElementById("progress-text");
+
+      gate.style.display = "none";
+      loading.classList.add("on");
+
+      try {
+        await provider.loadModel(modelId, report => {
+          const pct = Math.round((report.progress || 0) * 100);
+          fill.style.width = pct + "%";
+          text.textContent = report.text || ("Loading… " + pct + "%");
+        });
+
+        loading.classList.remove("on");
+        document.getElementById("mascot-hero").classList.add("hidden");
+        document.getElementById("chat").classList.add("on");
+        document.querySelector(".strip-sub").textContent =
+          provider === remote ? "running in the cloud" : "running on your device";
+        addMessage("bot", provider === remote
+          ? "I'm here. No script — just somewhere to put what's on your mind. " +
+            "What's going on today?"
+          : "I'm here. No script, no notes leaving this device — just somewhere " +
+            "to put what's on your mind. What's going on today?");
+        document.getElementById("chat-input").focus();
+      } catch (e) {
+        console.error(e);
+        text.textContent =
+          "Couldn't load the model: " + (e && e.message ? e.message : "unknown error") +
+          ". Reload to try again.";
+      }
+    }
+
+    /* ---- Transcript ------------------------------------------------------- */
+
+    function addMessage(role, content) {
+      const el = document.createElement("div");
+      el.className = "msg " + role;
+      el.textContent = content;
+      const t = document.getElementById("transcript");
+      t.appendChild(el);
+      t.scrollTop = t.scrollHeight;
+      return el;
+    }
+
+    function addCrisisCard() {
+      const card = document.createElement("div");
+      card.className = "crisis-card";
+      card.innerHTML =
+        "<strong>If you're in danger, please reach a person now.</strong>" +
+        "Call or text <strong>988</strong> (US Suicide &amp; Crisis Lifeline, 24/7), " +
+        'or text HOME to <strong>741741</strong>. More options are on the ' +
+        '<a href="resources.html">Resources</a> page. ' +
+        "This companion isn't a crisis service and can't get help to you.";
+      const t = document.getElementById("transcript");
+      t.appendChild(card);
+      t.scrollTop = t.scrollHeight;
+    }
+
+    /* ---- Sending ---------------------------------------------------------- */
+
+    window.sendMessage = async function() {
+      const input = document.getElementById("chat-input");
+      const btn = document.getElementById("send-btn");
+      const text = input.value.trim();
+      if (!text || busy) return;
+
+      busy = true;
+      btn.disabled = true;
+      input.value = "";
+      input.style.height = "52px";
+
+      addMessage("user", text);
+      history.push({ role: "user", content: text });
+
+      // Surface help immediately, before and independent of the model reply.
+      if (detectCrisis(text)) addCrisisCard();
+
+      const bubble = addMessage("bot", "…");
+      bubble.classList.add("thinking");
+
+      const messages = [{ role: "system", content: systemPrompt }]
+        .concat(history.slice(-MAX_TURNS));
+
+      try {
+        const reply = await provider.streamReply(messages, (_bit, full) => {
+          bubble.classList.remove("thinking");
+          bubble.textContent = full;
+          const t = document.getElementById("transcript");
+          t.scrollTop = t.scrollHeight;
+        });
+
+        const finalText = reply || "I'm not sure what to say to that. Can you tell me a bit more?";
+        bubble.classList.remove("thinking");
+        bubble.textContent = finalText;
+        history.push({ role: "assistant", content: finalText });
+      } catch (e) {
+        console.error(e);
+        bubble.classList.remove("thinking");
+        bubble.textContent = "Something went wrong generating a reply. Try again?";
+      } finally {
+        busy = false;
+        btn.disabled = false;
+        input.focus();
+      }
+    };
+
+    window.resetChat = function() {
+      if (busy) return;
+      if (!confirm("Clear this conversation?")) return;
+      history = [];
+      document.getElementById("transcript").innerHTML = "";
+      addMessage("bot", "Cleared. What would you like to talk about?");
+    };
+
+    /* ---- Composer behaviour ----------------------------------------------- */
+
+    const input = document.getElementById("chat-input");
+
+    input.addEventListener("input", () => {
+      input.style.height = "52px";
+      input.style.height = Math.min(input.scrollHeight, 140) + "px";
+    });
+
+    input.addEventListener("keydown", e => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        window.sendMessage();
+      }
+    });
+  </script>
+</body>
+</html>

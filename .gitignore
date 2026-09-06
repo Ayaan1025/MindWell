@@ -1,0 +1,14 @@
+# Cloudflare Worker local secrets — NEVER commit these
+worker/.dev.vars
+.dev.vars
+.env
+.env.*
+
+# Wrangler build state
+worker/.wrangler/
+.wrangler/
+
+node_modules/
+*.log
+.DS_Store
+Thumbs.db

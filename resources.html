@@ -2,107 +2,102 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>MindWell – Resources</title>
+  <link rel="stylesheet" href="theme.css">
   <style>
-    nav { margin-top: 10px; }
-    nav a {
-      color: white;
-      text-decoration: none;
-      margin: 0 15px;
-      font-weight: bold;
-    }
-    nav a:hover { text-decoration: underline; }
-    #logout-btn {
-      background: rgba(255,255,255,0.2);
-      color: white;
-      border: 1px solid rgba(255,255,255,0.5);
-      padding: 5px 14px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 13px;
-      margin-left: 15px;
-    }
-    #logout-btn:hover { background: rgba(255,255,255,0.35); }
-    #user-email { font-size: 12px; opacity: 0.75; margin-top: 6px; }
-    body { font-family: Arial, Helvetica, sans-serif; background: #f2f4f8; margin: 0; padding: 0; color: #333; }
-    header { background: #2f5d62; color: white; padding: 20px; text-align: center; }
-    main { max-width: 800px; margin: 30px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    h2 { color: #2f5d62; margin-top: 0; }
-    footer { text-align: center; padding: 15px; font-size: 12px; color: #666; }
-
     /* Accordion styles */
     .accordion {
-      border: 1px solid #d0e4e6;
-      border-radius: 8px;
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
       margin-bottom: 12px;
       overflow: hidden;
+      background: rgba(255,255,255,0.03);
+      transition: border-color 0.25s ease;
     }
+    .accordion:hover { border-color: var(--glass-border-bright); }
     .accordion-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 14px 18px;
-      background: #eef6f7;
+      padding: 15px 18px;
+      background: var(--glass-bg);
       cursor: pointer;
-      font-weight: bold;
-      color: #2f5d62;
+      font-weight: 500;
+      color: var(--text);
       font-size: 15px;
-      transition: background 0.2s;
+      font-family: inherit;
+      transition: background 0.25s ease;
       border: none;
       width: 100%;
       text-align: left;
     }
-    .accordion-header:hover { background: #d9eef0; }
+    .accordion-header:hover { background: var(--glass-bg-strong); }
+    .accordion-header.open {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
     .accordion-header .icon {
-      font-size: 18px;
+      font-size: 16px;
       transition: transform 0.3s ease;
       flex-shrink: 0;
       margin-left: 10px;
+      color: var(--text-muted);
     }
     .accordion-header.open .icon {
       transform: rotate(180deg);
+      color: var(--accent);
     }
     .accordion-body {
       max-height: 0;
       overflow: hidden;
       transition: max-height 0.35s ease, padding 0.3s ease;
-      background: white;
+      background: rgba(255,255,255,0.02);
       padding: 0 18px;
       font-size: 14px;
-      color: #444;
-      line-height: 1.7;
+      color: var(--text-muted);
+      line-height: 1.75;
     }
     .accordion-body.open {
       max-height: 400px;
-      padding: 14px 18px;
+      padding: 15px 18px;
     }
+    .accordion-body strong { color: var(--text); font-weight: 600; }
     .accordion-body a {
-      color: #2f5d62;
-      font-weight: bold;
+      color: var(--accent);
+      font-weight: 500;
     }
     .accordion-body ol, .accordion-body ul {
       margin: 8px 0 4px 0;
       padding-left: 20px;
     }
-    .accordion-body li { margin-bottom: 4px; }
+    .accordion-body li { margin-bottom: 5px; }
     .resource-tag {
       display: inline-block;
       font-size: 11px;
-      padding: 2px 8px;
-      border-radius: 10px;
-      background: #c8f7f0;
-      color: #1a6b62;
-      font-weight: bold;
+      padding: 2px 9px;
+      border-radius: 999px;
+      background: var(--mood-calm);
+      border: 1px solid var(--mood-calm-line);
+      color: #bff0e7;
+      font-weight: 500;
       margin-left: 8px;
       vertical-align: middle;
     }
   </style>
 </head>
 <body>
-  <header>
+  <div class="cosmos" aria-hidden="true">
+    <span class="orb orb-a"></span>
+    <span class="orb orb-b"></span>
+    <span class="orb orb-c"></span>
+  </div>
+  <div class="mood-wash" aria-hidden="true"></div>
+
+  <header class="fade-up">
     <nav>
       <a href="index.html">Home</a>
+      <a href="chat.html">Companion</a>
       <a href="insights.html">Insights</a>
       <a href="journal.html">Journal</a>
       <a href="resources.html">Resources</a>
@@ -113,7 +108,7 @@
     <div id="user-email"></div>
   </header>
 
-  <main>
+  <main class="fade-up d2 stagger">
     <h2>Mental Health Resources</h2>
 
     <!-- 988 Crisis Lifeline -->

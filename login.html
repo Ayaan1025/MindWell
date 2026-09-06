@@ -2,120 +2,122 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>MindWell – Login</title>
+  <link rel="stylesheet" href="theme.css">
+  <script src="intro.js"></script>
   <style>
     body {
-      font-family: Arial, Helvetica, sans-serif;
-      background: #f2f4f8;
-      margin: 0;
-      padding: 0;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
     }
-    header {
-      background: #2f5d62;
-      color: white;
-      padding: 20px;
-      text-align: center;
-    }
-    header h1 { margin: 0 0 5px 0; }
-    header p { margin: 0; font-size: 14px; opacity: 0.85; }
+    header h1 { margin: 0 0 6px 0; }
+
+    /* This page centres a single card instead of using the shared main slab,
+       so the glass treatment lives on .card here. */
     main {
       flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 40px 20px;
+      max-width: none;
+      margin: 0;
+      background: none;
+      border: none;
+      box-shadow: none;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
     }
     .card {
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-      padding: 36px 40px;
+      padding: 38px 40px;
       width: 100%;
       max-width: 400px;
     }
     h2 {
-      color: #2f5d62;
-      margin: 0 0 24px 0;
+      margin: 0 0 26px 0;
       text-align: center;
+      font-size: 22px;
     }
     .tabs {
       display: flex;
-      margin-bottom: 24px;
-      border-bottom: 2px solid #e0e0e0;
+      margin-bottom: 26px;
+      border-bottom: 1px solid var(--glass-border);
     }
     .tab {
       flex: 1;
       padding: 10px;
       text-align: center;
       cursor: pointer;
-      font-weight: bold;
-      color: #888;
-      transition: 0.2s;
+      font-weight: 500;
+      font-size: 14px;
+      color: var(--text-dim);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color 0.25s ease, border-color 0.25s ease;
     }
+    .tab:hover { color: var(--text-muted); }
     .tab.active {
-      color: #2f5d62;
-      border-bottom: 3px solid #2f5d62;
-      margin-bottom: -2px;
+      color: var(--accent);
+      border-bottom-color: var(--accent);
     }
     label {
       display: block;
-      margin-bottom: 6px;
-      font-size: 14px;
-      font-weight: bold;
-      color: #444;
+      margin-bottom: 7px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
     }
     input[type="email"],
     input[type="password"] {
       width: 100%;
-      padding: 10px 12px;
-      margin-bottom: 16px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+      padding: 11px 13px;
+      margin-bottom: 17px;
       font-size: 14px;
-      box-sizing: border-box;
-    }
-    input:focus {
-      outline: none;
-      border-color: #2f5d62;
     }
     .btn {
       width: 100%;
       padding: 13px;
-      background: #2f5d62;
-      color: white;
+      background: var(--accent-soft);
+      border: 1px solid rgba(201,179,242,0.4);
+      color: var(--accent);
       font-size: 15px;
-      border: none;
-      border-radius: 6px;
+      font-family: inherit;
+      border-radius: 12px;
       cursor: pointer;
-      font-weight: bold;
-      transition: background 0.2s;
+      font-weight: 500;
+      transition: background 0.25s ease, border-color 0.25s ease,
+                  box-shadow 0.25s ease;
     }
-    .btn:hover { background: #24484c; }
+    .btn:hover {
+      background: rgba(201,179,242,0.26);
+      border-color: rgba(201,179,242,0.65);
+      box-shadow: 0 0 20px rgba(201,179,242,0.18);
+    }
     .error {
-      color: #c0392b;
+      color: var(--danger);
       font-size: 13px;
-      margin-top: 12px;
+      margin-top: 14px;
       text-align: center;
       min-height: 18px;
-    }
-    footer {
-      text-align: center;
-      padding: 15px;
-      font-size: 12px;
-      color: #666;
     }
   </style>
 </head>
 <body>
-  <header>
+  <div class="cosmos" aria-hidden="true">
+    <span class="orb orb-a"></span>
+    <span class="orb orb-b"></span>
+    <span class="orb orb-c"></span>
+  </div>
+  <div class="mood-wash" aria-hidden="true"></div>
+
+  <header class="fade-up">
     <h1>MindWell</h1>
     <p>Mental Health – Emotional Check-In Interface</p>
   </header>
   <main>
-    <div class="card">
+    <div class="card glass fade-up d2">
       <h2>Welcome</h2>
       <div class="tabs">
         <div class="tab active" id="tab-login" onclick="switchTab('login')">Log In</div>
@@ -153,7 +155,8 @@
 
     // If already logged in, skip to home
     onAuthStateChanged(auth, user => {
-      if (user) window.location.href = "index.html";
+      if (user) { window.location.href = "index.html"; return; }
+      if (window.MindWellIntro) window.MindWellIntro.play({ hello: "Welcome", name: "MindWell" });
     });
 
     window.switchTab = function(tab) {

@@ -1,0 +1,20 @@
+rules_version = '2';
+
+// MindWell — every document lives under users/{uid}, and only that signed-in
+// user may read or write it. Without a rule like this, the project config in
+// firebase-config.js (which is public by design) is enough for anyone to read
+// every user's journal.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null
+                         && request.auth.uid == userId;
+    }
+
+    // Anything not matched above is denied.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

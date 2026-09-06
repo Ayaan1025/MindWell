@@ -2,111 +2,96 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>MindWell – Insights</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="theme.css">
   <style>
-    nav { margin-top: 10px; }
-    nav a {
-      color: white;
-      text-decoration: none;
-      margin: 0 15px;
-      font-weight: bold;
-    }
-    nav a:hover { text-decoration: underline; }
-    #logout-btn {
-      background: rgba(255,255,255,0.2);
-      color: white;
-      border: 1px solid rgba(255,255,255,0.5);
-      padding: 5px 14px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 13px;
-      margin-left: 15px;
-    }
-    #logout-btn:hover { background: rgba(255,255,255,0.35); }
-    #user-email { font-size: 12px; opacity: 0.75; margin-top: 6px; }
-    body { font-family: Arial; background: #f2f4f8; margin: 0; color: #333; }
-    header { background: #2f5d62; color: white; padding: 20px; text-align: center; }
-    main {
-      max-width: 800px;
-      margin: 30px auto;
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    h2 { color: #2f5d62; margin-top: 0; }
-    h3 { color: #2f5d62; margin: 24px 0 10px 0; font-size: 15px; }
+    h3 { margin: 24px 0 10px 0; font-size: 15px; }
     .stat {
-      padding: 14px 18px;
-      margin: 10px 0;
-      background: #eef6f7;
-      border-left: 5px solid #2f5d62;
-      border-radius: 4px;
+      padding: 15px 18px;
+      margin: 11px 0;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius-sm);
       display: flex;
       justify-content: space-between;
       align-items: center;
       font-size: 15px;
+      color: var(--text-muted);
+      transition: background 0.25s ease, border-color 0.25s ease;
+    }
+    .stat:hover {
+      background: var(--glass-bg-strong);
+      border-color: var(--glass-border-bright);
     }
     .stat-count {
       font-size: 22px;
-      font-weight: bold;
-      color: #2f5d62;
+      font-weight: 600;
+      color: var(--text);
+      margin-left: 16px;
     }
-    .stat-calm { border-color: #1a6b62; }
-    .stat-okay { border-color: #1a4a8a; }
-    .stat-anxious { border-color: #8a4a00; }
-    .stat-overwhelmed { border-color: #8a1a1a; }
+    .stat-calm        { border-left-color: var(--mood-calm-line); }
+    .stat-okay        { border-left-color: var(--mood-okay-line); }
+    .stat-anxious     { border-left-color: var(--mood-anxious-line); }
+    .stat-overwhelmed { border-left-color: var(--mood-overwhelmed-line); }
     .bar-wrap {
-      background: #e0e0e0;
+      background: rgba(255,255,255,0.08);
       border-radius: 6px;
-      height: 10px;
-      margin-top: 6px;
+      height: 8px;
+      margin-top: 8px;
       overflow: hidden;
     }
     .bar {
-      height: 10px;
+      height: 8px;
       border-radius: 6px;
-      transition: width 0.5s ease;
+      transition: width 0.6s ease;
     }
-    .bar-calm { background: #c8f7f0; }
-    .bar-okay { background: #dbe9ff; }
-    .bar-anxious { background: #ffe0b2; }
-    .bar-overwhelmed { background: #ffcdd2; }
+    .bar-calm        { background: linear-gradient(90deg, rgba(90,190,178,0.55),  rgba(127,214,202,0.9)); }
+    .bar-okay        { background: linear-gradient(90deg, rgba(126,152,226,0.55), rgba(159,179,232,0.9)); }
+    .bar-anxious     { background: linear-gradient(90deg, rgba(214,160,96,0.55),  rgba(232,186,124,0.9)); }
+    .bar-overwhelmed { background: linear-gradient(90deg, rgba(206,122,140,0.55), rgba(226,154,168,0.9)); }
     .summary {
-      margin-top: 24px;
-      padding: 16px;
-      background: #f9f9f9;
-      border-radius: 8px;
+      margin-top: 26px;
+      padding: 17px 19px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
       font-size: 14px;
-      color: #555;
-      border: 1px solid #e0e0e0;
+      color: var(--text-muted);
+      display: none;
+      animation: fade-up 0.6s cubic-bezier(0.22,0.61,0.36,1) both;
     }
-    .summary strong { color: #2f5d62; }
-    #loading { color: #888; font-style: italic; }
+    .summary strong { color: var(--text); font-weight: 600; }
+    #loading { color: var(--text-dim); font-style: italic; }
     #streak {
-      margin-top: 20px;
-      padding: 14px 18px;
-      background: #2f5d62;
-      color: white;
-      border-radius: 8px;
+      margin-top: 22px;
+      padding: 15px 18px;
+      background: var(--accent-soft);
+      border: 1px solid rgba(232,198,154,0.35);
+      color: var(--accent-warm);
+      border-radius: var(--radius-sm);
       font-size: 15px;
       text-align: center;
+      display: none;
+      box-shadow: 0 0 24px rgba(232,198,154,0.12);
+      animation: fade-up 0.6s cubic-bezier(0.22,0.61,0.36,1) both;
     }
-    footer { text-align: center; padding: 15px; font-size: 12px; color: #666; }
 
     .chart-section {
-      margin-top: 30px;
-      padding-top: 20px;
-      border-top: 1px solid #e8f0f1;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid var(--glass-border);
+      display: none;
+      animation: fade-up 0.6s cubic-bezier(0.22,0.61,0.36,1) both;
     }
     .chart-box {
-      background: #f9fdfd;
-      border-radius: 8px;
-      padding: 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 18px;
       margin-bottom: 20px;
-      border: 1px solid #e0eef0;
     }
     .chart-box canvas {
       max-height: 260px;
@@ -117,6 +102,7 @@
     }
     .chart-row .chart-box {
       flex: 1;
+      min-width: 0;
     }
     @media (max-width: 560px) {
       .chart-row { flex-direction: column; }
@@ -124,9 +110,17 @@
   </style>
 </head>
 <body>
-  <header>
+  <div class="cosmos" aria-hidden="true">
+    <span class="orb orb-a"></span>
+    <span class="orb orb-b"></span>
+    <span class="orb orb-c"></span>
+  </div>
+  <div class="mood-wash" aria-hidden="true"></div>
+
+  <header class="fade-up">
     <nav>
       <a href="index.html">Home</a>
+      <a href="chat.html">Companion</a>
       <a href="insights.html">Insights</a>
       <a href="journal.html">Journal</a>
       <a href="resources.html">Resources</a>
@@ -137,10 +131,10 @@
     <div id="user-email"></div>
   </header>
 
-  <main>
+  <main class="fade-up d2">
     <h2>Mood Insights</h2>
     <div id="loading">Loading insights...</div>
-    <div id="stats"></div>
+    <div id="stats" class="stagger"></div>
     <div id="streak" style="display:none;"></div>
 
     <div class="chart-section" id="chart-section" style="display:none;">
@@ -182,18 +176,35 @@
     };
 
     const moodScore = { Calm: 4, Okay: 3, Anxious: 2, Overwhelmed: 1 };
+
+    // Chart palette tuned for the dark cosmic backdrop: translucent fills with
+    // brighter strokes, so series stay legible against glass.
     const moodColors = {
-      Calm: "#c8f7f0",
-      Okay: "#dbe9ff",
-      Anxious: "#ffe0b2",
-      Overwhelmed: "#ffcdd2"
+      Calm: "rgba(90, 190, 178, 0.55)",
+      Okay: "rgba(126, 152, 226, 0.55)",
+      Anxious: "rgba(214, 160, 96, 0.55)",
+      Overwhelmed: "rgba(206, 122, 140, 0.55)"
     };
     const moodBorderColors = {
-      Calm: "#1a6b62",
-      Okay: "#1a4a8a",
-      Anxious: "#8a4a00",
-      Overwhelmed: "#8a1a1a"
+      Calm: "#7fd6ca",
+      Okay: "#9fb3e8",
+      Anxious: "#e8ba7c",
+      Overwhelmed: "#e29aa8"
     };
+
+    const gridColor = "rgba(255, 255, 255, 0.07)";
+    const tickColor = "#b6a9c6";
+
+    Chart.defaults.color = tickColor;
+    Chart.defaults.borderColor = gridColor;
+    Chart.defaults.font.family =
+      '"Segoe UI", Inter, system-ui, -apple-system, Helvetica, Arial, sans-serif';
+    Chart.defaults.plugins.tooltip.backgroundColor = "rgba(24, 15, 38, 0.94)";
+    Chart.defaults.plugins.tooltip.borderColor = "rgba(255, 255, 255, 0.14)";
+    Chart.defaults.plugins.tooltip.borderWidth = 1;
+    Chart.defaults.plugins.tooltip.titleColor = "#f0eaf6";
+    Chart.defaults.plugins.tooltip.bodyColor = "#b6a9c6";
+    Chart.defaults.plugins.tooltip.padding = 10;
 
     async function loadInsights(uid) {
       const loadingEl = document.getElementById("loading");
@@ -218,7 +229,7 @@
         const total = Object.values(counts).reduce((a, b) => a + b, 0);
 
         if (total === 0) {
-          statsEl.innerHTML = "<p style='color:#888;'>No entries yet. Log your first mood on the home page!</p>";
+          statsEl.innerHTML = "<p style='color:var(--text-dim);'>No entries yet. Log your first mood on the home page!</p>";
           return;
         }
 
@@ -287,8 +298,8 @@
           datasets: [{
             label: "Mood",
             data: lineData,
-            borderColor: "#2f5d62",
-            backgroundColor: "rgba(47, 93, 98, 0.08)",
+            borderColor: "#c9b3f2",
+            backgroundColor: "rgba(201, 179, 242, 0.10)",
             pointBackgroundColor: linePointColors,
             pointBorderColor: linePointColors,
             pointRadius: 6,
@@ -318,11 +329,13 @@
                 stepSize: 1,
                 callback: val => ({ 1: "Overwhelmed", 2: "Anxious", 3: "Okay", 4: "Calm" }[val] || "")
               },
-              grid: { color: "#f0f0f0" }
+              grid: { color: gridColor },
+              border: { color: gridColor }
             },
             x: {
               ticks: { maxTicksLimit: 10, maxRotation: 45 },
-              grid: { display: false }
+              grid: { display: false },
+              border: { color: gridColor }
             }
           }
         }
@@ -371,9 +384,10 @@
             y: {
               beginAtZero: true,
               ticks: { stepSize: 1 },
-              grid: { color: "#f0f0f0" }
+              grid: { color: gridColor },
+              border: { color: gridColor }
             },
-            x: { grid: { display: false } }
+            x: { grid: { display: false }, border: { color: gridColor } }
           }
         }
       });

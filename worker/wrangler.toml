@@ -1,0 +1,28 @@
+name = "mindwell-companion"
+main = "worker.js"
+compatibility_date = "2026-09-01"
+
+# ---------------------------------------------------------------------------
+# Public configuration. Safe to commit — none of these are secrets.
+#
+# The API key is NOT here and must never be. Set it with:
+#     wrangler secret put API_KEY
+# ---------------------------------------------------------------------------
+[vars]
+# Any OpenAI-compatible chat/completions endpoint.
+UPSTREAM_URL = "https://api.groq.com/openai/v1/chat/completions"
+
+# Groq production models, verified current. If the 70B returns an upstream
+# error on your account, drop to one of the others and redeploy.
+#   llama-3.3-70b-versatile   best quality  (may need account access)
+#   openai/gpt-oss-120b       large, fast
+#   llama-3.1-8b-instant      always-on free-tier workhorse
+MODEL = "llama-3.3-70b-versatile"
+
+# Must match the projectId in firebase-config.js — it's the `aud` claim the
+# Worker checks on every incoming ID token.
+FIREBASE_PROJECT_ID = "mindwell---it390"
+
+# Lock this to your deployed origin before going public. "*" is fine only
+# while testing from 127.0.0.1.
+ALLOWED_ORIGIN = "*"
