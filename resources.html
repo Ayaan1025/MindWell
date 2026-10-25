@@ -1,194 +1,104 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MindWell – Resources</title>
-  <link rel="stylesheet" href="theme.css">
-  <style>
-    /* Accordion styles */
-    .accordion {
-      border: 1px solid var(--glass-border);
-      border-radius: var(--radius-sm);
-      margin-bottom: 12px;
-      overflow: hidden;
-      background: rgba(255,255,255,0.03);
-      transition: border-color 0.25s ease;
-    }
-    .accordion:hover { border-color: var(--glass-border-bright); }
-    .accordion-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 15px 18px;
-      background: var(--glass-bg);
-      cursor: pointer;
-      font-weight: 500;
-      color: var(--text);
-      font-size: 15px;
-      font-family: inherit;
-      transition: background 0.25s ease;
-      border: none;
-      width: 100%;
-      text-align: left;
-    }
-    .accordion-header:hover { background: var(--glass-bg-strong); }
-    .accordion-header.open {
-      background: var(--accent-soft);
-      color: var(--accent);
-    }
-    .accordion-header .icon {
-      font-size: 16px;
-      transition: transform 0.3s ease;
-      flex-shrink: 0;
-      margin-left: 10px;
-      color: var(--text-muted);
-    }
-    .accordion-header.open .icon {
-      transform: rotate(180deg);
-      color: var(--accent);
-    }
-    .accordion-body {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.35s ease, padding 0.3s ease;
-      background: rgba(255,255,255,0.02);
-      padding: 0 18px;
-      font-size: 14px;
-      color: var(--text-muted);
-      line-height: 1.75;
-    }
-    .accordion-body.open {
-      max-height: 400px;
-      padding: 15px 18px;
-    }
-    .accordion-body strong { color: var(--text); font-weight: 600; }
-    .accordion-body a {
-      color: var(--accent);
-      font-weight: 500;
-    }
-    .accordion-body ol, .accordion-body ul {
-      margin: 8px 0 4px 0;
-      padding-left: 20px;
-    }
-    .accordion-body li { margin-bottom: 5px; }
-    .resource-tag {
-      display: inline-block;
-      font-size: 11px;
-      padding: 2px 9px;
-      border-radius: 999px;
-      background: var(--mood-calm);
-      border: 1px solid var(--mood-calm-line);
-      color: #bff0e7;
-      font-weight: 500;
-      margin-left: 8px;
-      vertical-align: middle;
-    }
-  </style>
+  <title>Resources · MindWell</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Source+Sans+3:wght@400;600&display=swap">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="cosmos" aria-hidden="true">
-    <span class="orb orb-a"></span>
-    <span class="orb orb-b"></span>
-    <span class="orb orb-c"></span>
-  </div>
-  <div class="mood-wash" aria-hidden="true"></div>
-
-  <header class="fade-up">
-    <nav>
+  <header class="site-header">
+    <div class="brand">
+      <a class="wordmark" href="index.html">MindWell</a>
+      <p class="tagline">Mental Health – Emotional Check-In Interface</p>
+    </div>
+    <nav class="site-nav" aria-label="Main">
       <a href="index.html">Home</a>
       <a href="chat.html">Companion</a>
       <a href="insights.html">Insights</a>
       <a href="journal.html">Journal</a>
-      <a href="resources.html">Resources</a>
-      <button id="logout-btn" onclick="handleLogout()">Log Out</button>
+      <a href="resources.html" aria-current="page">Resources</a>
     </nav>
-    <h1>MindWell</h1>
-    <p>Mental Health – Emotional Check-In Interface</p>
-    <div id="user-email"></div>
+    <div class="account">
+      <span id="user-email"></span>
+      <button type="button" class="link-button" id="logout-btn" onclick="handleLogout()">Log Out</button>
+    </div>
   </header>
 
-  <main class="fade-up d2 stagger">
-    <h2>Mental Health Resources</h2>
+  <main>
+    <h1>Resources</h1>
+    <p class="lede">Where to get help right now, and two short exercises for when things feel like too much.</p>
 
-    <!-- 988 Crisis Lifeline -->
-    <div class="accordion">
-      <button class="accordion-header" onclick="toggleAccordion(this)">
-        <span>📞 988 Suicide &amp; Crisis Lifeline (US) <span class="resource-tag">Crisis Support</span></span>
-        <span class="icon">▾</span>
-      </button>
-      <div class="accordion-body">
-        <p>The 988 Suicide &amp; Crisis Lifeline provides free, confidential support 24/7 for people in distress.</p>
+    <section class="panel crisis" aria-labelledby="crisis-heading">
+      <h2 id="crisis-heading">If you need to talk to someone now</h2>
+      <ul>
+        <li>
+          <strong>988 Suicide &amp; Crisis Lifeline (US).</strong>
+          Call <a href="tel:988">988</a> or text <a href="sms:988">988</a>, any time of day.
+          You can also <a href="https://988lifeline.org/chat/" target="_blank" rel="noopener">chat online</a>.
+          It's free and confidential, and you can reach out if you're worried about someone else.
+        </li>
+        <li>
+          <strong>Crisis Text Line.</strong>
+          Text HOME to <a href="sms:741741?&amp;body=HOME">741741</a> to reach a trained counselor by text.
+        </li>
+        <li>
+          If you or someone near you is in immediate danger, call <a href="tel:911">911</a>.
+        </li>
+        <li>
+          Outside the US, <a href="https://findahelpline.com" target="_blank" rel="noopener">findahelpline.com</a> lists free services by country.
+        </li>
+      </ul>
+    </section>
+
+    <h2>Exercises</h2>
+
+    <details>
+      <summary>4-7-8 breathing <span class="muted">(about a minute)</span></summary>
+      <div class="details-body">
+        <p>A long, slow exhale can take the edge off anxiety. Sit or lie down somewhere comfortable.</p>
+        <ol>
+          <li>Breathe out fully through your mouth.</li>
+          <li>Close your mouth and breathe in quietly through your nose for a count of 4.</li>
+          <li>Hold your breath for a count of 7.</li>
+          <li>Breathe out through your mouth for a count of 8.</li>
+          <li>That's one cycle. Do four in a row.</li>
+        </ol>
+        <p>If holding makes you lightheaded, count faster. Keeping the 4, 7, 8 ratio matters more than the exact seconds.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>5-4-3-2-1 grounding <span class="muted">(2 to 3 minutes)</span></summary>
+      <div class="details-body">
+        <p>Useful when your thoughts are racing or you feel far away from what's around you. Go slowly and name each thing, out loud or in your head.</p>
+        <ol>
+          <li>5 things you can see.</li>
+          <li>4 things you can touch, like your feet on the floor or the fabric of your sleeve.</li>
+          <li>3 things you can hear.</li>
+          <li>2 things you can smell. If nothing stands out, think of two smells you like.</li>
+          <li>1 thing you can taste, or one food you'd like to eat.</li>
+        </ol>
+      </div>
+    </details>
+
+    <details>
+      <summary>Finding ongoing support</summary>
+      <div class="details-body">
         <ul>
-          <li><strong>Call or text:</strong> 988</li>
-          <li><strong>Chat:</strong> <a href="https://988lifeline.org" target="_blank">988lifeline.org</a></li>
-          <li>Available 24 hours a day, 7 days a week</li>
-          <li>Staffed by trained crisis counselors</li>
-          <li>Also available for those worried about someone else</li>
+          <li><strong>Someone you trust.</strong> A short text is enough to start: "I've been having a rough time. Can we talk this week?"</li>
+          <li><strong>A therapist.</strong> The <a href="https://www.psychologytoday.com/us/therapists" target="_blank" rel="noopener">Psychology Today directory</a> lets you filter by location, insurance and specialty. Your insurer can also send you a list of in-network providers.</li>
+          <li><strong>Your school or job.</strong> Most colleges offer free counseling, and many employers have an Employee Assistance Program with a few free sessions.</li>
+          <li><strong>SAMHSA National Helpline.</strong> <a href="tel:18006624357">1-800-662-4357</a>, free and open 24/7, for referrals to local treatment and support groups.</li>
         </ul>
       </div>
-    </div>
-
-    <!-- 5-4-3-2-1 Grounding -->
-    <div class="accordion">
-      <button class="accordion-header" onclick="toggleAccordion(this)">
-        <span>🌿 Grounding Technique: 5-4-3-2-1 Sensory Method <span class="resource-tag">Anxiety Relief</span></span>
-        <span class="icon">▾</span>
-      </button>
-      <div class="accordion-body">
-        <p>This technique helps bring your attention to the present moment when you feel anxious or overwhelmed. Work through each sense slowly:</p>
-        <ol>
-          <li><strong>5 things you can SEE</strong> – Look around and name 5 things you can see right now.</li>
-          <li><strong>4 things you can TOUCH</strong> – Notice 4 things you can physically feel (your feet on the floor, the texture of your clothes).</li>
-          <li><strong>3 things you can HEAR</strong> – Listen for 3 distinct sounds around you.</li>
-          <li><strong>2 things you can SMELL</strong> – Notice 2 scents, or recall 2 smells you enjoy.</li>
-          <li><strong>1 thing you can TASTE</strong> – Notice any taste in your mouth, or think of a food you enjoy.</li>
-        </ol>
-        <p>Repeat as needed. This works best when done slowly and deliberately.</p>
-      </div>
-    </div>
-
-    <!-- 4-7-8 Breathing -->
-    <div class="accordion">
-      <button class="accordion-header" onclick="toggleAccordion(this)">
-        <span>🫁 Breathing Exercise: 4-7-8 Method <span class="resource-tag">Stress Reduction</span></span>
-        <span class="icon">▾</span>
-      </button>
-      <div class="accordion-body">
-        <p>The 4-7-8 breathing technique activates your body's relaxation response and can help reduce anxiety quickly. Follow these steps:</p>
-        <ol>
-          <li>Sit comfortably and close your eyes.</li>
-          <li><strong>Inhale</strong> through your nose for <strong>4 seconds</strong>.</li>
-          <li><strong>Hold</strong> your breath for <strong>7 seconds</strong>.</li>
-          <li><strong>Exhale</strong> slowly through your mouth for <strong>8 seconds</strong>.</li>
-          <li>Repeat this cycle <strong>3–4 times</strong>.</li>
-        </ol>
-        <p>Tip: Place one hand on your belly to ensure you're breathing deeply from the diaphragm, not shallowly from the chest.</p>
-      </div>
-    </div>
-
-    <!-- Reach Out -->
-    <div class="accordion">
-      <button class="accordion-header" onclick="toggleAccordion(this)">
-        <span>🤝 Reach Out to Trusted Friends or Professionals <span class="resource-tag">Social Support</span></span>
-        <span class="icon">▾</span>
-      </button>
-      <div class="accordion-body">
-        <p>Talking to someone you trust can make a significant difference. Here are some ways to reach out:</p>
-        <ul>
-          <li><strong>Friends &amp; family:</strong> Send a simple text — "I've been struggling lately, can we talk?" is enough.</li>
-          <li><strong>Therapist or counselor:</strong> Look for licensed therapists via <a href="https://www.psychologytoday.com/us/therapists" target="_blank">Psychology Today</a> or your insurance provider.</li>
-          <li><strong>School counselor:</strong> If you're a student, your institution likely offers free counseling services.</li>
-          <li><strong>Crisis Text Line:</strong> Text HOME to <strong>741741</strong> to connect with a crisis counselor via text.</li>
-          <li><strong>Online therapy:</strong> Services like BetterHelp or Talkspace offer flexible, remote options.</li>
-        </ul>
-        <p>Asking for help is a sign of strength, not weakness.</p>
-      </div>
-    </div>
-
+    </details>
   </main>
 
-  <footer>© 2026 MindWell</footer>
+  <footer class="site-footer">© 2026 MindWell</footer>
 
   <script type="module">
     import { auth } from "./firebase-config.js";
@@ -203,23 +113,6 @@
       await signOut(auth);
       window.location.href = "login.html";
     };
-  </script>
-
-  <script>
-    function toggleAccordion(btn) {
-      const body = btn.nextElementSibling;
-      const isOpen = btn.classList.contains("open");
-
-      // Close all
-      document.querySelectorAll(".accordion-header").forEach(h => h.classList.remove("open"));
-      document.querySelectorAll(".accordion-body").forEach(b => b.classList.remove("open"));
-
-      // Open clicked one (unless it was already open)
-      if (!isOpen) {
-        btn.classList.add("open");
-        body.classList.add("open");
-      }
-    }
   </script>
 </body>
 </html>

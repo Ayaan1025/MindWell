@@ -458,6 +458,29 @@ body.overwhelmed .checkin { background: var(--overwhelmed-wash); }
 .chart-row .chart-box { flex: 1; min-width: 0; }
 
 /* --------------------------------------------------------------------------
+   Resources (resources.html)
+   -------------------------------------------------------------------------- */
+
+.crisis { margin-bottom: 8px; }
+.crisis h2 { margin-top: 0; font-size: 20px; }
+.crisis ul { margin: 0; padding-left: 20px; }
+.crisis li { margin-bottom: 8px; }
+
+details { border-top: 1px solid var(--line); }
+details:last-of-type { border-bottom: 1px solid var(--line); }
+summary {
+  padding: 14px 0;
+  font-weight: 600;
+  cursor: pointer;
+}
+summary::marker { color: var(--text-dim); }
+summary .muted { font-weight: 400; }
+.details-body { padding: 0 0 12px 20px; }
+.details-body ol,
+.details-body ul { margin: 0 0 12px; padding-left: 20px; }
+.details-body li { margin-bottom: 6px; }
+
+/* --------------------------------------------------------------------------
    Login (login.html)
    -------------------------------------------------------------------------- */
 
