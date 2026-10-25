@@ -16,6 +16,7 @@
      API_KEY              secret  — set with `wrangler secret put API_KEY`
      UPSTREAM_URL         var
      MODEL                var
+     FALLBACK_MODEL       var     — used if MODEL isn't on the account
      FIREBASE_PROJECT_ID  var
      ALLOWED_ORIGIN       var     — exact origin, or * while developing
    ========================================================================== */
@@ -164,28 +165,49 @@ export default {
 
     // Only the fields we intend to forward — never spread the client body,
     // or a caller could set their own model and burn quota on it.
-    const upstreamBody = {
-      model: env.MODEL,
-      messages: messages.map(m => ({
-        role: String(m.role || "user"),
-        content: String(m.content || "")
-      })),
-      stream: true,
-      temperature: 0.7,
-      max_tokens: MAX_TOKENS
-    };
+    const cleanMessages = messages.map(m => ({
+      role: String(m.role || "user"),
+      content: String(m.content || "")
+    }));
 
-    // --- forward ---
-    let upstream;
-    try {
-      upstream = await fetch(env.UPSTREAM_URL, {
+    function callUpstream(model) {
+      return fetch(env.UPSTREAM_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: "Bearer " + env.API_KEY
         },
-        body: JSON.stringify(upstreamBody)
+        body: JSON.stringify({
+          model,
+          messages: cleanMessages,
+          stream: true,
+          temperature: 0.7,
+          max_tokens: MAX_TOKENS
+        })
       });
+    }
+
+    // --- forward, falling back once if the model isn't on this account ---
+    // Model availability varies by provider tier, and the failure is a plain
+    // 404 that looks identical to a config error. Retrying once with a known
+    // always-on model turns a dead end into a working reply.
+    let upstream;
+    let usedModel = env.MODEL;
+    try {
+      upstream = await callUpstream(usedModel);
+
+      if (upstream.status === 404 && env.FALLBACK_MODEL &&
+          env.FALLBACK_MODEL !== usedModel) {
+        const detail = await upstream.text().catch(() => "");
+        if (detail.includes("model_not_found") || detail.includes("does not exist")) {
+          console.log("model", usedModel, "unavailable; falling back to", env.FALLBACK_MODEL);
+          usedModel = env.FALLBACK_MODEL;
+          upstream = await callUpstream(usedModel);
+        } else {
+          console.log("upstream error 404", detail.slice(0, 400));
+          return jsonError("Upstream error 404", 502, env);
+        }
+      }
     } catch (e) {
       return jsonError("Upstream unreachable", 502, env);
     }
@@ -193,9 +215,12 @@ export default {
     if (!upstream.ok || !upstream.body) {
       const detail = await upstream.text().catch(() => "");
       // Don't echo the upstream body verbatim; it can carry key hints.
-      console.log("upstream error", upstream.status, detail.slice(0, 400));
+      console.log("upstream error", upstream.status, "model", usedModel,
+                  detail.slice(0, 400));
       return jsonError("Upstream error " + upstream.status, 502, env);
     }
+
+    console.log("ok via", usedModel);
 
     return new Response(upstream.body, {
       status: 200,
