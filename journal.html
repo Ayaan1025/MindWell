@@ -90,6 +90,13 @@
       window.location.href = "login.html";
     };
 
+    // Reflections are user-written; never hand them to innerHTML raw.
+    function escapeHTML(str) {
+      return String(str)
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    }
+
     async function loadJournal(uid) {
       const entriesDiv = document.getElementById("entries");
       const loadingEl = document.getElementById("loading");
@@ -112,8 +119,8 @@
           const badgeClass = "badge-" + e.mood.toLowerCase();
           return `
             <div class="entry">
-              <div class="date">${e.date} <span class="mood-badge ${badgeClass}">${e.mood}</span></div>
-              <div class="reflection">${e.reflection}</div>
+              <div class="date">${escapeHTML(e.date)} <span class="mood-badge ${escapeHTML(badgeClass)}">${escapeHTML(e.mood)}</span></div>
+              <div class="reflection">${escapeHTML(e.reflection)}</div>
             </div>
           `;
         }).join("");

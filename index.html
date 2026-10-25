@@ -217,6 +217,13 @@
     import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { doc, setDoc, getDoc, deleteDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+    // Reflections are user-written; never hand them to innerHTML raw.
+    function escapeHTML(str) {
+      return String(str)
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    }
+
     let currentUser = null;
     let selectedMood = "";
 
@@ -319,7 +326,7 @@
         feedbackBox.innerHTML =
           "<strong>Date:</strong> " + selectedDate +
           "<br><strong>Mood:</strong> " + selectedMood +
-          "<br><br><strong>Your Reflection:</strong> " + reflectionText +
+          "<br><br><strong>Your Reflection:</strong> " + escapeHTML(reflectionText) +
           "<br><br><strong>System Feedback:</strong> " + message;
         feedbackBox.style.display = "block";
 
@@ -341,8 +348,8 @@
           const entry = snap.data();
           feedbackBox.innerHTML =
             "<strong>Saved Entry for " + date + ":</strong>" +
-            "<br><br><strong>Mood:</strong> " + entry.mood +
-            "<br><strong>Reflection:</strong> " + entry.reflection;
+            "<br><br><strong>Mood:</strong> " + escapeHTML(entry.mood) +
+            "<br><strong>Reflection:</strong> " + escapeHTML(entry.reflection);
           feedbackBox.style.display = "block";
         } else {
           feedbackBox.style.display = "none";
