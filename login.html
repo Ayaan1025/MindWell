@@ -13,16 +13,16 @@
   <header class="site-header">
     <div class="brand">
       <a class="wordmark" href="login.html">MindWell</a>
-      <p class="tagline">Mental Health – Emotional Check-In Interface</p>
+      <p class="tagline">Daily mood check-ins and a private journal</p>
     </div>
   </header>
 
   <main class="auth-main">
     <div class="auth-card">
-      <h1>Welcome</h1>
+      <h1 id="auth-heading">Welcome back</h1>
       <div class="tabs" role="tablist">
-        <button type="button" class="tab" role="tab" id="tab-login" aria-selected="true" aria-controls="form-login" onclick="switchTab('login')">Log In</button>
-        <button type="button" class="tab" role="tab" id="tab-signup" aria-selected="false" aria-controls="form-signup" onclick="switchTab('signup')">Sign Up</button>
+        <button type="button" class="tab" role="tab" id="tab-login" aria-selected="true" aria-controls="form-login" onclick="switchTab('login')">Log in</button>
+        <button type="button" class="tab" role="tab" id="tab-signup" aria-selected="false" aria-controls="form-signup" onclick="switchTab('signup')">Sign up</button>
       </div>
 
       <div id="form-login" role="tabpanel" aria-labelledby="tab-login">
@@ -30,7 +30,7 @@
         <input type="email" id="login-email" autocomplete="email" placeholder="you@email.com">
         <label for="login-password">Password</label>
         <input type="password" id="login-password" autocomplete="current-password">
-        <button type="button" class="btn" onclick="handleLogin()">Log In</button>
+        <button type="button" class="btn" onclick="handleLogin()">Log in</button>
       </div>
 
       <div id="form-signup" role="tabpanel" aria-labelledby="tab-signup" hidden>
@@ -38,7 +38,7 @@
         <input type="email" id="signup-email" autocomplete="email" placeholder="you@email.com">
         <label for="signup-password">Password</label>
         <input type="password" id="signup-password" autocomplete="new-password" placeholder="At least 6 characters">
-        <button type="button" class="btn" onclick="handleSignup()">Create Account</button>
+        <button type="button" class="btn" onclick="handleSignup()">Create account</button>
       </div>
 
       <div class="status-line error" id="auth-error" role="alert"></div>
@@ -65,6 +65,8 @@
       document.getElementById("tab-signup").setAttribute("aria-selected", String(tab === "signup"));
       document.getElementById("form-login").hidden = tab !== "login";
       document.getElementById("form-signup").hidden = tab !== "signup";
+      document.getElementById("auth-heading").textContent =
+        tab === "login" ? "Welcome back" : "Create your account";
       document.getElementById("auth-error").textContent = "";
     };
 
@@ -94,13 +96,16 @@
 
     function friendlyError(code) {
       switch(code) {
-        case "auth/invalid-email": return "Invalid email address.";
-        case "auth/user-not-found": return "No account found with that email.";
-        case "auth/wrong-password": return "Incorrect password.";
-        case "auth/email-already-in-use": return "An account with that email already exists.";
-        case "auth/weak-password": return "Password must be at least 6 characters.";
-        case "auth/invalid-credential": return "Incorrect email or password.";
-        default: return "Something went wrong. Please try again.";
+        case "auth/invalid-email": return "That email address doesn't look right.";
+        case "auth/missing-password": return "Enter your password.";
+        case "auth/user-not-found": return "No account uses that email. Want to sign up instead?";
+        case "auth/wrong-password":
+        case "auth/invalid-credential": return "That email and password don't match.";
+        case "auth/email-already-in-use": return "There's already an account with that email. Try logging in.";
+        case "auth/weak-password": return "Use at least 6 characters for your password.";
+        case "auth/too-many-requests": return "Too many attempts. Wait a few minutes and try again.";
+        case "auth/network-request-failed": return "Couldn't reach the server. Check your connection.";
+        default: return "Something went wrong. Try again in a moment.";
       }
     }
   </script>

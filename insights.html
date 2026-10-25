@@ -14,7 +14,7 @@
   <header class="site-header">
     <div class="brand">
       <a class="wordmark" href="index.html">MindWell</a>
-      <p class="tagline">Mental Health – Emotional Check-In Interface</p>
+      <p class="tagline">Daily mood check-ins and a private journal</p>
     </div>
     <nav class="site-nav" aria-label="Main">
       <a href="index.html">Home</a>
@@ -25,12 +25,13 @@
     </nav>
     <div class="account">
       <span id="user-email"></span>
-      <button type="button" class="link-button" id="logout-btn" onclick="handleLogout()">Log Out</button>
+      <button type="button" class="link-button" id="logout-btn" onclick="handleLogout()">Log out</button>
     </div>
   </header>
 
   <main>
-    <h1>Mood Insights</h1>
+    <h1>Insights</h1>
+    <p class="lede">How your check-ins add up over time.</p>
     <div id="loading" aria-busy="true" aria-label="Loading insights">
       <div class="stat"><span class="skeleton skeleton-line"></span><span class="skeleton skeleton-line"></span><span class="skeleton skeleton-line"></span></div>
       <div class="stat"><span class="skeleton skeleton-line"></span><span class="skeleton skeleton-line"></span><span class="skeleton skeleton-line"></span></div>
@@ -43,17 +44,17 @@
     <p class="summary" id="summary" hidden></p>
 
     <section class="chart-section" id="chart-section" hidden>
-      <h2>Mood Over Time</h2>
+      <h2>Mood over time</h2>
       <div class="chart-box">
         <canvas id="lineChart" aria-label="Mood by date" role="img"></canvas>
       </div>
       <div class="chart-row">
         <div class="chart-box">
-          <h3>Mood Breakdown</h3>
+          <h3>Share of each mood</h3>
           <canvas id="doughnutChart" aria-label="Share of each mood" role="img"></canvas>
         </div>
         <div class="chart-box">
-          <h3>Entries per Mood</h3>
+          <h3>Days per mood</h3>
           <canvas id="barChart" aria-label="Number of days per mood" role="img"></canvas>
         </div>
       </div>
@@ -125,7 +126,7 @@
         const total = Object.values(counts).reduce((a, b) => a + b, 0);
 
         if (total === 0) {
-          statsEl.innerHTML = "<p class='muted'>No entries yet. Log your first mood on the home page!</p>";
+          statsEl.innerHTML = "<p class='muted'>No check-ins yet. Once you've logged a few days, your patterns will show up here. <a href='index.html'>Check in now</a>.</p>";
           return;
         }
 
@@ -135,7 +136,7 @@
           const key = mood.toLowerCase();
           return `
             <div class="stat">
-              <span class="stat-label"><span class="swatch swatch-${key}"></span>${mood} days</span>
+              <span class="stat-label"><span class="swatch swatch-${key}"></span>${mood}</span>
               <div class="bar-wrap"><div class="bar bar-${key}" style="width:${pct}%"></div></div>
               <span class="stat-count">${count}</span>
             </div>
@@ -154,19 +155,21 @@
           } else break;
         }
         streakEl.hidden = false;
-        streakEl.textContent = streak > 0
-          ? `${streak}-day check-in streak! Keep it up.`
-          : "Start your streak — log today's mood!";
+        streakEl.innerHTML = streak > 0
+          ? `You've checked in <strong>${streak}</strong> ${streak === 1 ? "day" : "days"} in a row.`
+          : `You haven't checked in today yet. <a href="index.html">Check in</a>.`;
         
         const dominant = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
         const positiveRate = Math.round(((counts.Calm + counts.Okay) / total) * 100);
         summaryEl.hidden = false;
         summaryEl.innerHTML = `
-          <strong>Summary:</strong> You've logged <strong>${total}</strong> total entries.
-          Your most common mood is <strong>${dominant}</strong>.
+          You've checked in <strong>${total}</strong> ${total === 1 ? "time" : "times"}, and your most
+          common mood is <strong>${dominant}</strong>.
           ${positiveRate >= 50
-            ? `<strong>${positiveRate}%</strong> of your days have been calm or okay — you're doing well.`
-            : `Consider reaching out for support or using the resources page — it's okay to ask for help.`}
+            ? `<strong>${positiveRate}%</strong> of your check-ins were Calm or Okay.`
+            : `More than half were Anxious or Overwhelmed. If that's been weighing on you,
+               the <a href="resources.html">Resources</a> page has some places to start,
+               including people you can talk to.`}
         `;
 
         chartSection.hidden = false;
@@ -175,7 +178,7 @@
       } catch (err) {
         loadingEl.hidden = true;
         const errorEl = document.getElementById("load-error");
-        errorEl.textContent = "Error loading insights.";
+        errorEl.textContent = "Couldn't load your insights. Refresh the page to try again.";
         errorEl.hidden = false;
         console.error(err);
       }

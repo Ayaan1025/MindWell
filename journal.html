@@ -13,7 +13,7 @@
   <header class="site-header">
     <div class="brand">
       <a class="wordmark" href="index.html">MindWell</a>
-      <p class="tagline">Mental Health – Emotional Check-In Interface</p>
+      <p class="tagline">Daily mood check-ins and a private journal</p>
     </div>
     <nav class="site-nav" aria-label="Main">
       <a href="index.html">Home</a>
@@ -24,19 +24,20 @@
     </nav>
     <div class="account">
       <span id="user-email"></span>
-      <button type="button" class="link-button" id="logout-btn" onclick="handleLogout()">Log Out</button>
+      <button type="button" class="link-button" id="logout-btn" onclick="handleLogout()">Log out</button>
     </div>
   </header>
 
   <main>
-    <h1>Journal History</h1>
+    <h1>Journal</h1>
+    <p class="lede">Every check-in you've saved, newest first.</p>
     <div id="loading" aria-busy="true" aria-label="Loading entries">
       <div class="entry"><span class="skeleton skeleton-line short"></span><span class="skeleton skeleton-line"></span><span class="skeleton skeleton-line mid"></span></div>
       <div class="entry"><span class="skeleton skeleton-line short"></span><span class="skeleton skeleton-line"></span><span class="skeleton skeleton-line mid"></span></div>
       <div class="entry"><span class="skeleton skeleton-line short"></span><span class="skeleton skeleton-line"></span><span class="skeleton skeleton-line mid"></span></div>
     </div>
     <p id="load-error" class="status-line error" hidden></p>
-    <p id="empty" class="muted" hidden>No journal entries yet. Head to the home page to log your first mood!</p>
+    <p id="empty" class="muted" hidden>Nothing here yet. Your entries will show up after your first <a href="index.html">check-in</a>.</p>
     <div id="entries"></div>
   </main>
 
@@ -58,11 +59,11 @@
       window.location.href = "login.html";
     };
 
-    // Reflections are user-written; never hand them to innerHTML raw.
-    function escapeHTML(str) {
-      return String(str)
-        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    // "2026-10-25" -> "Sunday, October 25, 2026". Parsed as local time.
+    function formatDate(dateStr) {
+      return new Date(dateStr + "T00:00:00").toLocaleDateString(undefined, {
+        weekday: "long", month: "long", day: "numeric", year: "numeric"
+      });
     }
 
     async function loadJournal(uid) {
@@ -83,22 +84,35 @@
           return;
         }
 
-        entriesDiv.innerHTML = entries.map(e => {
-          const key = escapeHTML(e.mood.toLowerCase());
-          return `
-            <article class="entry">
-              <div class="entry-meta">
-                <span>${escapeHTML(e.date)}</span>
-                <span class="mood-badge badge-${key}"><span class="swatch swatch-${key}"></span>${escapeHTML(e.mood)}</span>
-              </div>
-              <div class="reflection">${escapeHTML(e.reflection)}</div>
-            </article>
-          `;
-        }).join("");
+        // Built with textContent so reflection text is never parsed as HTML.
+        entriesDiv.replaceChildren(...entries.map(e => {
+          const key = String(e.mood).toLowerCase();
+          const article = document.createElement("article");
+          article.className = "entry";
+
+          const meta = document.createElement("div");
+          meta.className = "entry-meta";
+          const date = document.createElement("time");
+          date.dateTime = e.date;
+          date.textContent = formatDate(e.date);
+          const badge = document.createElement("span");
+          badge.className = "mood-badge badge-" + key;
+          const swatch = document.createElement("span");
+          swatch.className = "swatch swatch-" + key;
+          badge.append(swatch, String(e.mood));
+          meta.append(date, badge);
+
+          const reflection = document.createElement("div");
+          reflection.className = "reflection";
+          reflection.textContent = e.reflection;
+
+          article.append(meta, reflection);
+          return article;
+        }));
       } catch(err) {
         loadingEl.hidden = true;
         const errorEl = document.getElementById("load-error");
-        errorEl.textContent = "Error loading entries.";
+        errorEl.textContent = "Couldn't load your entries. Refresh the page to try again.";
         errorEl.hidden = false;
         console.error(err);
       }

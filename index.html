@@ -13,7 +13,7 @@
   <header class="site-header">
     <div class="brand">
       <a class="wordmark" href="index.html">MindWell</a>
-      <p class="tagline">Mental Health – Emotional Check-In Interface</p>
+      <p class="tagline">Daily mood check-ins and a private journal</p>
     </div>
     <nav class="site-nav" aria-label="Main">
       <a href="index.html" aria-current="page">Home</a>
@@ -24,21 +24,22 @@
     </nav>
     <div class="account">
       <span id="user-email"></span>
-      <button type="button" class="link-button" id="logout-btn" onclick="handleLogout()">Log Out</button>
+      <button type="button" class="link-button" id="logout-btn" onclick="handleLogout()">Log out</button>
     </div>
   </header>
 
   <main>
-    <h1>Daily Emotional Check-In</h1>
+    <h1>How are you today?</h1>
 
     <div class="calendar-head">
-      <h2 id="month-label">Monthly Overview</h2>
+      <h2 id="month-label">This month</h2>
     </div>
     <div id="calendar" aria-busy="true"></div>
 
     <section class="checkin" aria-labelledby="checkin-heading">
       <h2 id="checkin-heading" class="visually-hidden">Check in</h2>
-      <p class="prompt">Select your current mood and briefly describe how you feel.</p>
+      <p class="muted" id="checkin-date"></p>
+      <p>Pick the word closest to how you feel, then write a sentence or two about why. Choose a day on the calendar to see or change that day's entry.</p>
       <div class="mood-buttons" role="group" aria-label="Mood">
         <button type="button" data-mood="Calm" aria-pressed="false" onclick="selectMood('Calm')"><span class="swatch swatch-calm"></span>Calm</button>
         <button type="button" data-mood="Okay" aria-pressed="false" onclick="selectMood('Okay')"><span class="swatch swatch-okay"></span>Okay</button>
@@ -47,10 +48,10 @@
       </div>
 
       <label for="reflection" class="visually-hidden">Reflection</label>
-      <textarea id="reflection" placeholder="Write a short reflection..."></textarea>
+      <textarea id="reflection" placeholder="What happened today? What's on your mind?"></textarea>
       <div class="checkin-actions">
-        <button type="button" class="btn" onclick="logMood()">Log Mood</button>
-        <button type="button" class="link-button danger" onclick="clearMood()">Clear Entry</button>
+        <button type="button" class="btn" onclick="logMood()">Save check-in</button>
+        <button type="button" class="link-button danger" onclick="clearMood()">Delete this entry</button>
       </div>
       <div class="status-line" id="saving-indicator" role="status"></div>
     </section>
@@ -65,11 +66,11 @@
     import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { doc, setDoc, getDoc, deleteDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // Reflections are user-written; never hand them to innerHTML raw.
-    function escapeHTML(str) {
-      return String(str)
-        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    // "2026-10-25" -> "Sunday, October 25". Parsed as local time.
+    function formatDate(dateStr) {
+      return new Date(dateStr + "T00:00:00").toLocaleDateString(undefined, {
+        weekday: "long", month: "long", day: "numeric"
+      });
     }
 
     let currentUser = null;
@@ -79,7 +80,7 @@
     const _today = new Date();
     let selectedDate = `${_today.getFullYear()}-${String(_today.getMonth()+1).padStart(2,'0')}-${String(_today.getDate()).padStart(2,'0')}`;
 
-    // Auth gate — redirect to login if not signed in
+    // Auth gate: redirect to login if not signed in
     onAuthStateChanged(auth, async user => {
       if (!user) {
         window.location.href = "login.html";
@@ -187,15 +188,61 @@
       });
     };
 
+    const MOOD_NOTES = {
+      Calm: "Glad today felt steady. If you know what helped, write it down so you can come back to it.",
+      Okay: "An okay day counts. If one thing would make tomorrow a little easier, what would it be?",
+      Anxious: "Sorry today has been tense. The 4-7-8 breathing exercise takes about a minute and can help things settle.",
+      Overwhelmed: "That sounds like a lot to carry. Take it one small thing at a time, and consider telling someone you trust how you're doing. If you need to talk to someone now, call or text 988."
+    };
+
+    function setStatus(text, isError = false) {
+      const indicator = document.getElementById("saving-indicator");
+      indicator.textContent = text;
+      indicator.classList.toggle("error", isError);
+    }
+
+    // Renders a saved entry with textContent only, so reflection text can
+    // never be interpreted as markup.
+    function showEntry(date, entry, note) {
+      const box = document.getElementById("feedbackBox");
+      const heading = document.createElement("h2");
+      heading.textContent = formatDate(date);
+
+      const badge = document.createElement("span");
+      const key = String(entry.mood).toLowerCase();
+      badge.className = "mood-badge badge-" + key;
+      const swatch = document.createElement("span");
+      swatch.className = "swatch swatch-" + key;
+      badge.append(swatch, String(entry.mood));
+
+      const text = document.createElement("p");
+      text.className = "reflection-text";
+      text.textContent = entry.reflection;
+
+      const parts = [heading, badge, text];
+      if (note) {
+        const p = document.createElement("p");
+        p.className = "note";
+        p.textContent = note + " ";
+        if (entry.mood === "Anxious" || entry.mood === "Overwhelmed") {
+          const link = document.createElement("a");
+          link.href = "resources.html";
+          link.textContent = "Open Resources";
+          p.append(link);
+        }
+        parts.push(p);
+      }
+      box.replaceChildren(...parts);
+      box.hidden = false;
+    }
+
     window.logMood = async function() {
       const reflectionText = document.getElementById("reflection").value.trim();
-      const feedbackBox = document.getElementById("feedbackBox");
-      const indicator = document.getElementById("saving-indicator");
 
-      if (!selectedMood) { alert("Please select a mood first."); return; }
-      if (!reflectionText) { alert("Please write a short reflection."); return; }
+      if (!selectedMood) { setStatus("Pick a mood first.", true); return; }
+      if (!reflectionText) { setStatus("Write a sentence or two before saving.", true); return; }
 
-      indicator.textContent = "Saving...";
+      setStatus("Saving…");
 
       try {
         await setDoc(doc(db, "users", currentUser.uid, "moods", selectedDate), {
@@ -204,40 +251,27 @@
           timestamp: new Date().toISOString()
         });
 
-        indicator.textContent = "✓ Saved";
-        setTimeout(() => indicator.textContent = "", 2000);
+        setStatus("Saved.");
+        setTimeout(() => setStatus(""), 2000);
 
-        const message = (selectedMood === "Calm" || selectedMood === "Okay")
-          ? "It looks like you're managing well today. Consider reinforcing what's working for you."
-          : "You may be experiencing stress. Consider slowing down, practicing grounding techniques, or reaching out for support.";
-
-        feedbackBox.innerHTML =
-          "<strong>Date:</strong> " + selectedDate +
-          "<br><strong>Mood:</strong> " + selectedMood +
-          "<br><br><strong>Your Reflection:</strong> " + escapeHTML(reflectionText) +
-          "<br><br><strong>System Feedback:</strong> " + message;
-        feedbackBox.hidden = false;
+        showEntry(selectedDate, { mood: selectedMood, reflection: reflectionText }, MOOD_NOTES[selectedMood]);
 
         document.getElementById("reflection").value = "";
         resetMoodSelection();
         await generateCalendar();
       } catch (e) {
-        indicator.textContent = "Error saving. Please try again.";
+        setStatus("Couldn't save that. Check your connection and try again.", true);
         console.error(e);
       }
     };
 
     async function loadEntry(date) {
       const feedbackBox = document.getElementById("feedbackBox");
+      document.getElementById("checkin-date").textContent = "For " + formatDate(date);
       try {
         const snap = await getDoc(doc(db, "users", currentUser.uid, "moods", date));
         if (snap.exists()) {
-          const entry = snap.data();
-          feedbackBox.innerHTML =
-            "<strong>Saved Entry for " + date + ":</strong>" +
-            "<br><br><strong>Mood:</strong> " + escapeHTML(entry.mood) +
-            "<br><strong>Reflection:</strong> " + escapeHTML(entry.reflection);
-          feedbackBox.hidden = false;
+          showEntry(date, snap.data());
         } else {
           feedbackBox.hidden = true;
         }
@@ -246,15 +280,18 @@
 
     window.clearMood = async function() {
       if (!selectedDate) return;
-      if (!confirm("Are you sure you want to delete this entry?")) return;
+      if (!confirm(`Delete your entry for ${formatDate(selectedDate)}? This can't be undone.`)) return;
       try {
         await deleteDoc(doc(db, "users", currentUser.uid, "moods", selectedDate));
         document.getElementById("reflection").value = "";
         document.getElementById("feedbackBox").hidden = true;
-        document.getElementById("saving-indicator").textContent = "";
+        setStatus("Entry deleted.");
         resetMoodSelection();
         await generateCalendar();
-      } catch(e) { console.error(e); }
+      } catch(e) {
+        setStatus("Couldn't delete that entry. Try again.", true);
+        console.error(e);
+      }
     };
   </script>
 </body>
