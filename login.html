@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>MindWell – Login</title>
   <link rel="stylesheet" href="theme.css">
-  <script src="intro.js"></script>
   <style>
     body {
       display: flex;
@@ -156,7 +155,6 @@
     // If already logged in, skip to home
     onAuthStateChanged(auth, user => {
       if (user) { window.location.href = "index.html"; return; }
-      if (window.MindWellIntro) window.MindWellIntro.play({ hello: "Welcome", name: "MindWell" });
     });
 
     window.switchTab = function(tab) {

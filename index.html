@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>MindWell</title>
   <link rel="stylesheet" href="theme.css">
-  <script src="intro.js"></script>
   <style>
     #calendar {
       display: grid;
@@ -238,7 +237,6 @@
         return;
       }
       currentUser = user;
-      if (window.MindWellIntro) window.MindWellIntro.play({ hello: "Welcome back", name: "MindWell" });
       document.getElementById("user-email").textContent = user.email;
       await generateCalendar();
       loadEntry(selectedDate);
