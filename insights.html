@@ -48,16 +48,6 @@
       <div class="chart-box">
         <canvas id="lineChart" aria-label="Mood by date" role="img"></canvas>
       </div>
-      <div class="chart-row">
-        <div class="chart-box">
-          <h3>Share of each mood</h3>
-          <canvas id="doughnutChart" aria-label="Share of each mood" role="img"></canvas>
-        </div>
-        <div class="chart-box">
-          <h3>Days per mood</h3>
-          <canvas id="barChart" aria-label="Number of days per mood" role="img"></canvas>
-        </div>
-      </div>
     </section>
   </main>
 
@@ -177,7 +167,7 @@
         `;
 
         chartSection.hidden = false;
-        buildCharts(entries, counts);
+        buildChart(entries);
 
       } catch (err) {
         loadingEl.hidden = true;
@@ -188,8 +178,7 @@
       }
     }
 
-    function buildCharts(entries, counts) {
-
+    function buildChart(entries) {
       const sorted = [...entries].sort((a, b) => new Date(a.date) - new Date(b.date));
       const lineLabels = sorted.map(e =>
         new Date(e.date + "T00:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" }));
@@ -244,55 +233,6 @@
               grid: { display: false },
               border: { color: gridColor }
             }
-          }
-        }
-      });
-
-      const doughnutLabels = Object.keys(counts);
-      new Chart(document.getElementById("doughnutChart"), {
-        type: "doughnut",
-        data: {
-          labels: doughnutLabels,
-          datasets: [{
-            data: doughnutLabels.map(m => counts[m]),
-            backgroundColor: doughnutLabels.map(m => moodColors[m]),
-            borderColor: token("--surface"),
-            borderWidth: 2
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              position: "bottom",
-              labels: { boxWidth: 10, boxHeight: 10, padding: 12 }
-            }
-          }
-        }
-      });
-
-      new Chart(document.getElementById("barChart"), {
-        type: "bar",
-        data: {
-          labels: Object.keys(counts),
-          datasets: [{
-            label: "Days",
-            data: Object.values(counts),
-            backgroundColor: Object.keys(counts).map(m => moodColors[m]),
-            borderRadius: 2
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: { legend: { display: false } },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: { stepSize: 1 },
-              grid: { color: gridColor },
-              border: { color: gridColor }
-            },
-            x: { grid: { display: false }, border: { color: gridColor } }
           }
         }
       });

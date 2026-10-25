@@ -481,10 +481,7 @@ body.overwhelmed .checkin { background: var(--overwhelmed-wash); }
   border-radius: var(--radius);
   background: var(--surface);
 }
-.chart-box h3 { margin-top: 0; font-size: 16px; }
 .chart-box canvas { max-height: 260px; }
-.chart-row { display: flex; gap: 16px; }
-.chart-row .chart-box { flex: 1; min-width: 0; }
 
 /* --------------------------------------------------------------------------
    Resources (resources.html)
@@ -686,7 +683,6 @@ summary .muted { font-weight: 400; }
   #calendar { gap: 3px; }
   .calendar-day { padding: 8px 0; font-size: 13px; }
   .stat { grid-template-columns: 7.5rem 1fr 2rem; }
-  .chart-row { flex-direction: column; }
   .msg { max-width: 92%; }
   #transcript { max-height: 46vh; }
 }
