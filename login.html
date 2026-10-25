@@ -40,13 +40,22 @@
         <label for="signup-password">Password</label>
         <input type="password" id="signup-password" autocomplete="new-password" placeholder="At least 6 characters">
         <button type="button" class="btn" onclick="handleSignup()">Create account</button>
+        <p class="consent">
+          By creating an account you agree to the <a href="terms.html">Terms</a> and
+          <a href="privacy.html">Privacy Policy</a>, including storing your check-ins with
+          Google Firebase.
+        </p>
       </div>
 
       <div class="status-line error" id="auth-error" role="alert"></div>
     </div>
   </main>
 
-  <footer class="site-footer">© 2026 MindWell</footer>
+  <footer class="site-footer">
+    <span>© 2026 MindWell</span>
+    <a href="privacy.html">Privacy</a>
+    <a href="terms.html">Terms</a>
+  </footer>
 
   <script type="module">
     import { auth } from "./firebase-config.js";

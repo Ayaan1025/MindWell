@@ -509,6 +509,14 @@ summary .muted { font-weight: 400; }
 .details-body li { margin-bottom: 6px; }
 
 /* --------------------------------------------------------------------------
+   Privacy and terms
+   -------------------------------------------------------------------------- */
+
+.legal { max-width: 680px; }
+.legal ul { padding-left: 20px; }
+.legal li { margin-bottom: 8px; }
+
+/* --------------------------------------------------------------------------
    Login (login.html)
    -------------------------------------------------------------------------- */
 
@@ -548,6 +556,7 @@ summary .muted { font-weight: 400; }
 .auth-card input { margin-bottom: 16px; }
 .auth-card .btn { width: 100%; }
 .auth-card .status-line { text-align: center; }
+.consent { margin: 12px 0 0; font-size: 13px; color: var(--text-dim); }
 
 /* --------------------------------------------------------------------------
    Companion (chat.html)

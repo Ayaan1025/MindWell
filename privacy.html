@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy · MindWell</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Source+Sans+3:wght@400;600&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <a class="wordmark" href="index.html">MindWell</a>
+      <p class="tagline">Daily mood check-ins and a private journal</p>
+    </div>
+  </header>
+
+  <main class="legal">
+    <h1>Privacy</h1>
+    <p class="muted">Last updated October 25, 2026</p>
+
+    <p>
+      MindWell is a personal mood journal. You write about how you're feeling, which is
+      sensitive, so this page explains exactly what MindWell stores, where it goes, and how
+      to delete it.
+    </p>
+
+    <h2>What MindWell collects</h2>
+    <ul>
+      <li>
+        <strong>Your email address and password,</strong> to create your account. Passwords
+        are handled by Firebase Authentication (a Google service). MindWell never sees or
+        stores your password in readable form.
+      </li>
+      <li>
+        <strong>Your check-ins.</strong> For each day you check in: the mood you picked
+        (Calm, Okay, Anxious or Overwhelmed), the reflection you wrote, and the time you saved it.
+      </li>
+      <li>
+        <strong>Companion messages.</strong> When you use the Companion, your messages and your
+        check-ins from the last 14 days are sent off to generate a reply (details below).
+        MindWell doesn't save these conversations. They're gone when you leave or clear the page.
+      </li>
+    </ul>
+    <p>
+      MindWell doesn't use analytics, advertising or tracking cookies. Firebase keeps you
+      signed in using your browser's local storage.
+    </p>
+
+    <h2>Where it's stored and who handles it</h2>
+    <ul>
+      <li>
+        <strong>Google Firebase</strong> stores your account (Firebase Authentication) and your
+        check-ins (Cloud Firestore). The database rules only let your signed-in account read or
+        write your own entries.
+      </li>
+      <li>
+        <strong>Cloudflare</strong> runs a small server that checks you're signed in and passes
+        Companion messages along. It doesn't save message content.
+      </li>
+      <li>
+        <strong>Groq</strong>, an AI provider, receives Companion messages and generates the
+        replies. It handles them under its own terms and privacy policy.
+      </li>
+      <li>
+        <strong>Google Fonts and jsDelivr</strong> serve the fonts and the chart library. Like
+        any website request, they can see your IP address.
+      </li>
+    </ul>
+
+    <h2>How it's used</h2>
+    <p>
+      Only to run the app: drawing your calendar, journal and insights, and giving the
+      Companion some context about your recent days. MindWell doesn't sell your data, share it
+      for advertising, or use it to train AI models.
+    </p>
+    <p>
+      The person who runs MindWell has administrator access to the database and could
+      technically view stored data. Entries are not looked at unless you ask for help with a
+      problem that requires it, or the law requires it.
+    </p>
+
+    <h2>Deleting your data</h2>
+    <ul>
+      <li>
+        <strong>One entry:</strong> on the Home page, choose the day on the calendar, then
+        select "Delete this entry".
+      </li>
+      <li>
+        <strong>Everything:</strong> on the Journal page, select "Delete my account and data".
+        This permanently removes every check-in and then your account. It can't be undone.
+      </li>
+      <li>
+        If you can't sign in, email the address below from the email on your account and we'll
+        delete it for you.
+      </li>
+    </ul>
+
+    <h2>MindWell is not medical care</h2>
+    <p>
+      MindWell is a self-reflection tool. It doesn't diagnose or treat anything, and it isn't a
+      substitute for a doctor, therapist or counselor. <strong>No one monitors what you write.</strong>
+      If you write that you're in danger, nobody will be alerted. If you need help now, call or
+      text <a href="tel:988">988</a> (US Suicide &amp; Crisis Lifeline) or call
+      <a href="tel:911">911</a>.
+    </p>
+
+    <h2>Children</h2>
+    <p>MindWell isn't meant for children under 13, and we don't knowingly collect their data.</p>
+
+    <h2>Changes</h2>
+    <p>If this policy changes, the date at the top will change too.</p>
+
+    <h2>Contact</h2>
+    <!-- TODO: placeholder address. Replace with a real inbox before launch. -->
+    <p>Questions or deletion requests: <a href="mailto:privacy@mindwell.example">privacy@mindwell.example</a></p>
+  </main>
+
+  <footer class="site-footer">
+    <span>© 2026 MindWell</span>
+    <a href="privacy.html" aria-current="page">Privacy</a>
+    <a href="terms.html">Terms</a>
+  </footer>
+</body>
+</html>
