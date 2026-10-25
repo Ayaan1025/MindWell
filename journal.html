@@ -3,76 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MindWell – Journal</title>
-  <link rel="stylesheet" href="theme.css">
-  <style>
-    .entry {
-      padding: 16px 18px;
-      margin: 12px 0;
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      border-left: 3px solid var(--accent);
-      border-radius: var(--radius-sm);
-      transition: background 0.25s ease, transform 0.25s ease,
-                  border-color 0.25s ease;
-    }
-    .entry:hover {
-      background: var(--glass-bg-strong);
-      border-color: var(--glass-border-bright);
-      border-left-color: var(--accent);
-      transform: translateX(3px);
-    }
-    .entry .date { font-weight: 600; color: var(--text); margin-bottom: 8px; font-size: 14px; }
-    .entry .mood { font-size: 13px; color: var(--text-muted); margin-bottom: 4px; }
-    .entry .reflection { font-size: 14px; color: var(--text-muted); }
-    .mood-badge {
-      display: inline-block;
-      padding: 2px 11px;
-      border-radius: 999px;
-      font-size: 11.5px;
-      font-weight: 500;
-      margin-left: 8px;
-      border: 1px solid transparent;
-      vertical-align: middle;
-    }
-    .badge-calm        { background: var(--mood-calm);        border-color: var(--mood-calm-line);        color: #bff0e7; }
-    .badge-okay        { background: var(--mood-okay);        border-color: var(--mood-okay-line);        color: #ccdaf9; }
-    .badge-anxious     { background: var(--mood-anxious);     border-color: var(--mood-anxious-line);     color: #f2d9b4; }
-    .badge-overwhelmed { background: var(--mood-overwhelmed); border-color: var(--mood-overwhelmed-line); color: #f4c8d1; }
-    #loading { color: var(--text-dim); font-style: italic; }
-    #empty { color: var(--text-dim); text-align: center; padding: 34px 0; display: none; }
-  </style>
+  <title>Journal · MindWell</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Source+Sans+3:wght@400;600&display=swap">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="cosmos" aria-hidden="true">
-    <span class="orb orb-a"></span>
-    <span class="orb orb-b"></span>
-    <span class="orb orb-c"></span>
-  </div>
-  <div class="mood-wash" aria-hidden="true"></div>
-
-  <header class="fade-up">
-    <nav>
+  <header class="site-header">
+    <div class="brand">
+      <a class="wordmark" href="index.html">MindWell</a>
+      <p class="tagline">Mental Health – Emotional Check-In Interface</p>
+    </div>
+    <nav class="site-nav" aria-label="Main">
       <a href="index.html">Home</a>
       <a href="chat.html">Companion</a>
       <a href="insights.html">Insights</a>
-      <a href="journal.html">Journal</a>
+      <a href="journal.html" aria-current="page">Journal</a>
       <a href="resources.html">Resources</a>
-      <button id="logout-btn" onclick="handleLogout()">Log Out</button>
     </nav>
-    <h1>MindWell</h1>
-    <p>Mental Health – Emotional Check-In Interface</p>
-    <div id="user-email"></div>
+    <div class="account">
+      <span id="user-email"></span>
+      <button type="button" class="link-button" id="logout-btn" onclick="handleLogout()">Log Out</button>
+    </div>
   </header>
 
-  <main class="fade-up d2">
-    <h2>Journal History</h2>
-    <div id="loading">Loading entries...</div>
-    <div id="empty">No journal entries yet. Head to the home page to log your first mood!</div>
-    <div id="entries" class="stagger"></div>
+  <main>
+    <h1>Journal History</h1>
+    <div id="loading" class="muted">Loading entries...</div>
+    <p id="empty" class="muted" hidden>No journal entries yet. Head to the home page to log your first mood!</p>
+    <div id="entries"></div>
   </main>
 
-  <footer>© 2026 MindWell</footer>
+  <footer class="site-footer">© 2026 MindWell</footer>
 
   <script type="module">
     import { auth, db } from "./firebase-config.js";
@@ -104,24 +67,27 @@
 
       try {
         const snapshot = await getDocs(collection(db, "users", uid, "moods"));
-        loadingEl.style.display = "none";
+        loadingEl.hidden = true;
 
         let entries = [];
         snapshot.forEach(d => entries.push({ date: d.id, ...d.data() }));
         entries.sort((a, b) => new Date(b.date) - new Date(a.date));
 
         if (entries.length === 0) {
-          emptyEl.style.display = "block";
+          emptyEl.hidden = false;
           return;
         }
 
         entriesDiv.innerHTML = entries.map(e => {
-          const badgeClass = "badge-" + e.mood.toLowerCase();
+          const key = escapeHTML(e.mood.toLowerCase());
           return `
-            <div class="entry">
-              <div class="date">${escapeHTML(e.date)} <span class="mood-badge ${escapeHTML(badgeClass)}">${escapeHTML(e.mood)}</span></div>
+            <article class="entry">
+              <div class="entry-meta">
+                <span>${escapeHTML(e.date)}</span>
+                <span class="mood-badge badge-${key}"><span class="swatch swatch-${key}"></span>${escapeHTML(e.mood)}</span>
+              </div>
               <div class="reflection">${escapeHTML(e.reflection)}</div>
-            </div>
+            </article>
           `;
         }).join("");
       } catch(err) {

@@ -3,262 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MindWell – Companion</title>
-  <link rel="stylesheet" href="theme.css">
-  <style>
-    main { display: flex; flex-direction: column; }
-
-    .disclaimer {
-      font-size: 12.5px;
-      color: var(--text-dim);
-      background: rgba(255,255,255,0.035);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--radius-sm);
-      padding: 11px 14px;
-      margin-bottom: 18px;
-      line-height: 1.6;
-    }
-    .disclaimer a { color: var(--accent-warm); }
-
-    /* ---- Connecting / setup states ---- */
-    .status {
-      display: none;
-      text-align: center;
-      color: var(--text-dim);
-      font-size: 13.5px;
-      padding: 40px 10px;
-    }
-    .status.on { display: block; }
-
-    .setup-note {
-      display: none;
-      padding: 18px;
-      border-radius: var(--radius-sm);
-      background: rgba(220,154,154,0.1);
-      border: 1px solid rgba(220,154,154,0.32);
-      color: var(--text-muted);
-      font-size: 14px;
-      line-height: 1.65;
-    }
-    .setup-note.on { display: block; }
-    .setup-note strong { color: var(--danger); }
-    .setup-note code {
-      background: rgba(255,255,255,0.08);
-      padding: 1px 6px;
-      border-radius: 4px;
-      font-size: 13px;
-    }
-
-    /* ---- Transcript ---- */
-    .chat { display: none; flex-direction: column; }
-    .chat.on { display: flex; }
-
-    .companion-strip {
-      display: flex;
-      align-items: center;
-      gap: 11px;
-      padding-bottom: 12px;
-      margin-bottom: 12px;
-      border-bottom: 1px solid var(--glass-border);
-    }
-    .companion-strip .mascot { width: 46px; height: 54px; flex-shrink: 0; }
-    .strip-name { font-size: 14px; font-weight: 500; color: var(--text); }
-    .strip-sub { font-size: 11.5px; color: var(--text-dim); }
-
-    #transcript {
-      min-height: 320px;
-      max-height: 54vh;
-      overflow-y: auto;
-      padding: 4px 4px 8px;
-      margin-bottom: 14px;
-    }
-    .msg {
-      max-width: 82%;
-      padding: 11px 15px;
-      border-radius: 14px;
-      margin-bottom: 11px;
-      font-size: 14px;
-      line-height: 1.62;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      animation: fade-up 0.45s cubic-bezier(0.22,0.61,0.36,1) both;
-    }
-    .msg.user {
-      margin-left: auto;
-      background: var(--accent-soft);
-      border: 1px solid rgba(201,179,242,0.3);
-      color: var(--text);
-      border-bottom-right-radius: 5px;
-    }
-    .msg.bot {
-      margin-right: auto;
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      color: var(--text-muted);
-      border-bottom-left-radius: 5px;
-    }
-    .msg.bot.thinking { color: var(--text-dim); font-style: italic; }
-
-    /* Crisis card — always additive, never replaces the reply. */
-    .crisis-card {
-      margin: 4px 0 13px;
-      padding: 15px 17px;
-      border-radius: var(--radius-sm);
-      background: rgba(232,198,154,0.1);
-      border: 1px solid rgba(232,198,154,0.42);
-      font-size: 13.5px;
-      line-height: 1.7;
-      color: var(--text-muted);
-      animation: fade-up 0.5s cubic-bezier(0.22,0.61,0.36,1) both;
-    }
-    .crisis-card strong { color: var(--accent-warm); display: block; margin-bottom: 5px; font-size: 14px; }
-    .crisis-card a { color: var(--accent-warm); font-weight: 500; }
-
-    /* ---- Composer ---- */
-    .composer { display: flex; gap: 10px; align-items: flex-end; }
-    #chat-input {
-      flex: 1;
-      height: 52px;
-      max-height: 140px;
-      padding: 14px 15px;
-      font-size: 14px;
-      resize: none;
-      line-height: 1.5;
-    }
-    #send-btn {
-      padding: 0 22px;
-      height: 52px;
-      background: var(--accent-soft);
-      border: 1px solid rgba(201,179,242,0.4);
-      color: var(--accent);
-      font-size: 14px;
-      font-family: inherit;
-      font-weight: 500;
-      border-radius: 12px;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: background 0.25s ease, border-color 0.25s ease,
-                  box-shadow 0.25s ease, opacity 0.25s ease;
-    }
-    #send-btn:hover:not(:disabled) {
-      background: rgba(201,179,242,0.26);
-      border-color: rgba(201,179,242,0.65);
-      box-shadow: 0 0 20px rgba(201,179,242,0.18);
-    }
-    #send-btn:disabled { opacity: 0.45; cursor: default; }
-
-    .chat-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 12px;
-      font-size: 12px;
-      color: var(--text-dim);
-      gap: 12px;
-    }
-    .linkish {
-      background: none;
-      border: none;
-      color: var(--text-dim);
-      font-family: inherit;
-      font-size: 12px;
-      cursor: pointer;
-      padding: 0;
-      text-decoration: underline;
-      text-underline-offset: 3px;
-    }
-    .linkish:hover { color: var(--text-muted); }
-
-    /* ---- Luna ---- */
-    .mw-shadow {
-      fill: rgba(10, 6, 18, 0.45);
-      transform-box: view-box;
-      transform-origin: 60px 129px;
-      animation: mw-shadow 4s ease-in-out infinite alternate;
-    }
-    .mw-stem   { stroke: var(--accent); stroke-width: 2.5; stroke-linecap: round; }
-    .mw-tip    { fill: var(--accent-warm); animation: mw-pulse 3.2s ease-in-out infinite alternate; }
-    .mw-visor  { fill: #241a33; }
-    .mw-eye    { fill: var(--accent-warm); transform-box: view-box; }
-    .mw-smile  { fill: none; stroke: var(--accent-warm); stroke-width: 2; stroke-linecap: round; opacity: 0.9; }
-    .mw-cheek  { fill: #e29aa8; opacity: 0.4; }
-
-    .mw-float {
-      transform-box: view-box;
-      transform-origin: 60px 116px;
-      animation: mw-float 4s ease-in-out infinite alternate;
-    }
-    @keyframes mw-float {
-      from { transform: translateY(0)    rotate(-1.2deg); }
-      to   { transform: translateY(-7px) rotate(1.2deg); }
-    }
-    @keyframes mw-shadow {
-      from { transform: scaleX(1);    opacity: 0.45; }
-      to   { transform: scaleX(0.86); opacity: 0.28; }
-    }
-    @keyframes mw-pulse {
-      from { opacity: 0.75; filter: drop-shadow(0 0 4px rgba(232,198,154,0.5)); }
-      to   { opacity: 1;    filter: drop-shadow(0 0 13px rgba(232,198,154,0.85)); }
-    }
-
-    /* Waves on arrival, then settles — a permanent wave would pull focus
-       away from the conversation. */
-    .mw-arm-wave {
-      transform-box: view-box;
-      transform-origin: 96.5px 70px;
-      animation: mw-wave 2.4s ease-in-out 3;
-    }
-    @keyframes mw-wave {
-      0%, 64%, 100% { transform: rotate(0deg); }
-      9%            { transform: rotate(25deg); }
-      19%           { transform: rotate(3deg); }
-      29%           { transform: rotate(25deg); }
-      39%           { transform: rotate(3deg); }
-      52%           { transform: rotate(13deg); }
-    }
-
-    .mw-eye-l { transform-origin: 49px 65px; animation: mw-blink 6.5s ease-in-out infinite; }
-    .mw-eye-r { transform-origin: 71px 65px; animation: mw-blink 6.5s ease-in-out infinite; }
-    @keyframes mw-blink {
-      0%, 90%, 100% { transform: scaleY(1); }
-      94%           { transform: scaleY(0.12); }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .mw-float, .mw-arm-wave, .mw-eye, .mw-tip, .mw-shadow { animation: none !important; }
-    }
-
-    @media (max-width: 620px) {
-      .msg { max-width: 92%; }
-      #transcript { max-height: 46vh; }
-      #send-btn { padding: 0 16px; }
-    }
-  </style>
+  <title>Companion · MindWell</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Source+Sans+3:wght@400;600&display=swap">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="cosmos" aria-hidden="true">
-    <span class="orb orb-a"></span>
-    <span class="orb orb-b"></span>
-    <span class="orb orb-c"></span>
-  </div>
-  <div class="mood-wash" aria-hidden="true"></div>
-
-  <header class="fade-up">
-    <nav>
+  <header class="site-header">
+    <div class="brand">
+      <a class="wordmark" href="index.html">MindWell</a>
+      <p class="tagline">Mental Health – Emotional Check-In Interface</p>
+    </div>
+    <nav class="site-nav" aria-label="Main">
       <a href="index.html">Home</a>
-      <a href="chat.html">Companion</a>
+      <a href="chat.html" aria-current="page">Companion</a>
       <a href="insights.html">Insights</a>
       <a href="journal.html">Journal</a>
       <a href="resources.html">Resources</a>
-      <button id="logout-btn" onclick="handleLogout()">Log Out</button>
     </nav>
-    <h1>MindWell</h1>
-    <p>Mental Health – Emotional Check-In Interface</p>
-    <div id="user-email"></div>
+    <div class="account">
+      <span id="user-email"></span>
+      <button type="button" class="link-button" id="logout-btn" onclick="handleLogout()">Log Out</button>
+    </div>
   </header>
 
-  <main class="fade-up d2">
-    <h2>Companion</h2>
+  <main>
+    <h1>Companion</h1>
 
     <div class="disclaimer">
       A reflective companion, not a therapist. It cannot diagnose, prescribe, or
@@ -274,7 +45,7 @@
       deployed Worker URL. See <code>worker/README.md</code>.
     </div>
 
-    <div class="status" id="status">Connecting…</div>
+    <div class="status muted" id="status">Connecting…</div>
 
     <div class="chat" id="chat">
       <div class="companion-strip">
@@ -286,17 +57,18 @@
       </div>
       <div id="transcript"></div>
       <div class="composer">
+        <label for="chat-input" class="visually-hidden">Message</label>
         <textarea id="chat-input" placeholder="What's on your mind?" rows="1"></textarea>
-        <button id="send-btn" onclick="sendMessage()">Send</button>
+        <button type="button" class="btn" id="send-btn" onclick="sendMessage()">Send</button>
       </div>
       <div class="chat-meta">
         <span id="context-note"></span>
-        <button class="linkish" onclick="resetChat()">Clear conversation</button>
+        <button type="button" class="link-button" onclick="resetChat()">Clear conversation</button>
       </div>
     </div>
   </main>
 
-  <footer>© 2026 MindWell</footer>
+  <footer class="site-footer">© 2026 MindWell</footer>
 
   <script type="module">
     import { auth, db } from "./firebase-config.js";
@@ -407,7 +179,7 @@
       busy = true;
       btn.disabled = true;
       input.value = "";
-      input.style.height = "52px";
+      input.style.height = "48px";
 
       addMessage("user", text);
       history.push({ role: "user", content: text });
@@ -461,7 +233,7 @@
     const input = document.getElementById("chat-input");
 
     input.addEventListener("input", () => {
-      input.style.height = "52px";
+      input.style.height = "48px";
       input.style.height = Math.min(input.scrollHeight, 140) + "px";
     });
 

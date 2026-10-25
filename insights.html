@@ -3,161 +3,58 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MindWell – Insights</title>
+  <title>Insights · MindWell</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="stylesheet" href="theme.css">
-  <style>
-    h3 { margin: 24px 0 10px 0; font-size: 15px; }
-    .stat {
-      padding: 15px 18px;
-      margin: 11px 0;
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      border-left: 3px solid var(--accent);
-      border-radius: var(--radius-sm);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 15px;
-      color: var(--text-muted);
-      transition: background 0.25s ease, border-color 0.25s ease;
-    }
-    .stat:hover {
-      background: var(--glass-bg-strong);
-      border-color: var(--glass-border-bright);
-    }
-    .stat-count {
-      font-size: 22px;
-      font-weight: 600;
-      color: var(--text);
-      margin-left: 16px;
-    }
-    .stat-calm        { border-left-color: var(--mood-calm-line); }
-    .stat-okay        { border-left-color: var(--mood-okay-line); }
-    .stat-anxious     { border-left-color: var(--mood-anxious-line); }
-    .stat-overwhelmed { border-left-color: var(--mood-overwhelmed-line); }
-    .bar-wrap {
-      background: rgba(255,255,255,0.08);
-      border-radius: 6px;
-      height: 8px;
-      margin-top: 8px;
-      overflow: hidden;
-    }
-    .bar {
-      height: 8px;
-      border-radius: 6px;
-      transition: width 0.6s ease;
-    }
-    .bar-calm        { background: linear-gradient(90deg, rgba(90,190,178,0.55),  rgba(127,214,202,0.9)); }
-    .bar-okay        { background: linear-gradient(90deg, rgba(126,152,226,0.55), rgba(159,179,232,0.9)); }
-    .bar-anxious     { background: linear-gradient(90deg, rgba(214,160,96,0.55),  rgba(232,186,124,0.9)); }
-    .bar-overwhelmed { background: linear-gradient(90deg, rgba(206,122,140,0.55), rgba(226,154,168,0.9)); }
-    .summary {
-      margin-top: 26px;
-      padding: 17px 19px;
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--radius-sm);
-      font-size: 14px;
-      color: var(--text-muted);
-      display: none;
-      animation: fade-up 0.6s cubic-bezier(0.22,0.61,0.36,1) both;
-    }
-    .summary strong { color: var(--text); font-weight: 600; }
-    #loading { color: var(--text-dim); font-style: italic; }
-    #streak {
-      margin-top: 22px;
-      padding: 15px 18px;
-      background: var(--accent-soft);
-      border: 1px solid rgba(232,198,154,0.35);
-      color: var(--accent-warm);
-      border-radius: var(--radius-sm);
-      font-size: 15px;
-      text-align: center;
-      display: none;
-      box-shadow: 0 0 24px rgba(232,198,154,0.12);
-      animation: fade-up 0.6s cubic-bezier(0.22,0.61,0.36,1) both;
-    }
-
-    .chart-section {
-      margin-top: 32px;
-      padding-top: 24px;
-      border-top: 1px solid var(--glass-border);
-      display: none;
-      animation: fade-up 0.6s cubic-bezier(0.22,0.61,0.36,1) both;
-    }
-    .chart-box {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--radius-sm);
-      padding: 18px;
-      margin-bottom: 20px;
-    }
-    .chart-box canvas {
-      max-height: 260px;
-    }
-    .chart-row {
-      display: flex;
-      gap: 16px;
-    }
-    .chart-row .chart-box {
-      flex: 1;
-      min-width: 0;
-    }
-    @media (max-width: 560px) {
-      .chart-row { flex-direction: column; }
-    }
-  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Source+Sans+3:wght@400;600&display=swap">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="cosmos" aria-hidden="true">
-    <span class="orb orb-a"></span>
-    <span class="orb orb-b"></span>
-    <span class="orb orb-c"></span>
-  </div>
-  <div class="mood-wash" aria-hidden="true"></div>
-
-  <header class="fade-up">
-    <nav>
+  <header class="site-header">
+    <div class="brand">
+      <a class="wordmark" href="index.html">MindWell</a>
+      <p class="tagline">Mental Health – Emotional Check-In Interface</p>
+    </div>
+    <nav class="site-nav" aria-label="Main">
       <a href="index.html">Home</a>
       <a href="chat.html">Companion</a>
-      <a href="insights.html">Insights</a>
+      <a href="insights.html" aria-current="page">Insights</a>
       <a href="journal.html">Journal</a>
       <a href="resources.html">Resources</a>
-      <button id="logout-btn" onclick="handleLogout()">Log Out</button>
     </nav>
-    <h1>MindWell</h1>
-    <p>Mental Health – Emotional Check-In Interface</p>
-    <div id="user-email"></div>
+    <div class="account">
+      <span id="user-email"></span>
+      <button type="button" class="link-button" id="logout-btn" onclick="handleLogout()">Log Out</button>
+    </div>
   </header>
 
-  <main class="fade-up d2">
-    <h2>Mood Insights</h2>
-    <div id="loading">Loading insights...</div>
-    <div id="stats" class="stagger"></div>
-    <div id="streak" style="display:none;"></div>
+  <main>
+    <h1>Mood Insights</h1>
+    <div id="loading" class="muted">Loading insights...</div>
+    <div id="stats"></div>
+    <p id="streak" hidden></p>
+    <p class="summary" id="summary" hidden></p>
 
-    <div class="chart-section" id="chart-section" style="display:none;">
-      <h3>Mood Over Time</h3>
+    <section class="chart-section" id="chart-section" hidden>
+      <h2>Mood Over Time</h2>
       <div class="chart-box">
-        <canvas id="lineChart"></canvas>
+        <canvas id="lineChart" aria-label="Mood by date" role="img"></canvas>
       </div>
       <div class="chart-row">
         <div class="chart-box">
-          <h3 style="margin-top:0;">Mood Breakdown</h3>
-          <canvas id="doughnutChart"></canvas>
+          <h3>Mood Breakdown</h3>
+          <canvas id="doughnutChart" aria-label="Share of each mood" role="img"></canvas>
         </div>
         <div class="chart-box">
-          <h3 style="margin-top:0;">Entries per Mood</h3>
-          <canvas id="barChart"></canvas>
+          <h3>Entries per Mood</h3>
+          <canvas id="barChart" aria-label="Number of days per mood" role="img"></canvas>
         </div>
       </div>
-    </div>
-
-    <div class="summary" id="summary" style="display:none;"></div>
+    </section>
   </main>
 
-  <footer>© 2026 MindWell</footer>
+  <footer class="site-footer">© 2026 MindWell</footer>
 
   <script type="module">
     import { auth, db } from "./firebase-config.js";
@@ -177,34 +74,27 @@
 
     const moodScore = { Calm: 4, Okay: 3, Anxious: 2, Overwhelmed: 1 };
 
-    // Chart palette tuned for the dark cosmic backdrop: translucent fills with
-    // brighter strokes, so series stay legible against glass.
+    // Mood colors come from styles.css so the charts match the rest of the app.
+    const css = getComputedStyle(document.documentElement);
+    const token = name => css.getPropertyValue(name).trim();
     const moodColors = {
-      Calm: "rgba(90, 190, 178, 0.55)",
-      Okay: "rgba(126, 152, 226, 0.55)",
-      Anxious: "rgba(214, 160, 96, 0.55)",
-      Overwhelmed: "rgba(206, 122, 140, 0.55)"
-    };
-    const moodBorderColors = {
-      Calm: "#7fd6ca",
-      Okay: "#9fb3e8",
-      Anxious: "#e8ba7c",
-      Overwhelmed: "#e29aa8"
+      Calm: token("--calm"),
+      Okay: token("--okay"),
+      Anxious: token("--anxious"),
+      Overwhelmed: token("--overwhelmed")
     };
 
-    const gridColor = "rgba(255, 255, 255, 0.07)";
-    const tickColor = "#b6a9c6";
+    const gridColor = token("--line");
 
-    Chart.defaults.color = tickColor;
+    Chart.defaults.color = token("--text-muted");
     Chart.defaults.borderColor = gridColor;
-    Chart.defaults.font.family =
-      '"Segoe UI", Inter, system-ui, -apple-system, Helvetica, Arial, sans-serif';
-    Chart.defaults.plugins.tooltip.backgroundColor = "rgba(24, 15, 38, 0.94)";
-    Chart.defaults.plugins.tooltip.borderColor = "rgba(255, 255, 255, 0.14)";
-    Chart.defaults.plugins.tooltip.borderWidth = 1;
-    Chart.defaults.plugins.tooltip.titleColor = "#f0eaf6";
-    Chart.defaults.plugins.tooltip.bodyColor = "#b6a9c6";
-    Chart.defaults.plugins.tooltip.padding = 10;
+    Chart.defaults.font.family = '"Source Sans 3", "Segoe UI", system-ui, sans-serif';
+    Chart.defaults.font.size = 13;
+    Chart.defaults.plugins.tooltip.backgroundColor = token("--text");
+    Chart.defaults.plugins.tooltip.titleColor = token("--bg");
+    Chart.defaults.plugins.tooltip.bodyColor = token("--bg");
+    Chart.defaults.plugins.tooltip.cornerRadius = 4;
+    Chart.defaults.plugins.tooltip.padding = 8;
 
     async function loadInsights(uid) {
       const loadingEl = document.getElementById("loading");
@@ -215,7 +105,7 @@
 
       try {
         const snapshot = await getDocs(collection(db, "users", uid, "moods"));
-        loadingEl.style.display = "none";
+        loadingEl.hidden = true;
 
         let counts = { Calm: 0, Okay: 0, Anxious: 0, Overwhelmed: 0 };
         let entries = []; // { date, mood }
@@ -229,7 +119,7 @@
         const total = Object.values(counts).reduce((a, b) => a + b, 0);
 
         if (total === 0) {
-          statsEl.innerHTML = "<p style='color:var(--text-dim);'>No entries yet. Log your first mood on the home page!</p>";
+          statsEl.innerHTML = "<p class='muted'>No entries yet. Log your first mood on the home page!</p>";
           return;
         }
 
@@ -238,12 +128,10 @@
           const pct = total > 0 ? Math.round((count / total) * 100) : 0;
           const key = mood.toLowerCase();
           return `
-            <div class="stat stat-${key}">
-              <div style="flex:1;">
-                <div>${mood} days</div>
-                <div class="bar-wrap"><div class="bar bar-${key}" style="width:${pct}%"></div></div>
-              </div>
-              <div class="stat-count">${count}</div>
+            <div class="stat">
+              <span class="stat-label"><span class="swatch swatch-${key}"></span>${mood} days</span>
+              <div class="bar-wrap"><div class="bar bar-${key}" style="width:${pct}%"></div></div>
+              <span class="stat-count">${count}</span>
             </div>
           `;
         }).join("");
@@ -259,14 +147,14 @@
             check.setDate(check.getDate() - 1);
           } else break;
         }
-        streakEl.style.display = "block";
+        streakEl.hidden = false;
         streakEl.textContent = streak > 0
-          ? `🔥 ${streak}-day check-in streak! Keep it up.`
+          ? `${streak}-day check-in streak! Keep it up.`
           : "Start your streak — log today's mood!";
         
         const dominant = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
         const positiveRate = Math.round(((counts.Calm + counts.Okay) / total) * 100);
-        summaryEl.style.display = "block";
+        summaryEl.hidden = false;
         summaryEl.innerHTML = `
           <strong>Summary:</strong> You've logged <strong>${total}</strong> total entries.
           Your most common mood is <strong>${dominant}</strong>.
@@ -275,7 +163,7 @@
             : `Consider reaching out for support or using the resources page — it's okay to ask for help.`}
         `;
 
-        chartSection.style.display = "block";
+        chartSection.hidden = false;
         buildCharts(entries, counts);
 
       } catch (err) {
@@ -289,7 +177,7 @@
       const sorted = [...entries].sort((a, b) => new Date(a.date) - new Date(b.date));
       const lineLabels = sorted.map(e => e.date);
       const lineData = sorted.map(e => moodScore[e.mood]);
-      const linePointColors = sorted.map(e => moodBorderColors[e.mood]);
+      const linePointColors = sorted.map(e => moodColors[e.mood]);
 
       new Chart(document.getElementById("lineChart"), {
         type: "line",
@@ -298,14 +186,14 @@
           datasets: [{
             label: "Mood",
             data: lineData,
-            borderColor: "#c9b3f2",
-            backgroundColor: "rgba(201, 179, 242, 0.10)",
+            borderColor: token("--line-strong"),
+            borderWidth: 1.5,
             pointBackgroundColor: linePointColors,
             pointBorderColor: linePointColors,
-            pointRadius: 6,
-            pointHoverRadius: 8,
-            tension: 0.3,
-            fill: true,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            tension: 0,
+            fill: false,
           }]
         },
         options: {
@@ -349,8 +237,8 @@
           datasets: [{
             data: doughnutLabels.map(m => counts[m]),
             backgroundColor: doughnutLabels.map(m => moodColors[m]),
-            borderColor: doughnutLabels.map(m => moodBorderColors[m]),
-            borderWidth: 1.5
+            borderColor: token("--surface"),
+            borderWidth: 2
           }]
         },
         options: {
@@ -372,9 +260,7 @@
             label: "Days",
             data: Object.values(counts),
             backgroundColor: Object.keys(counts).map(m => moodColors[m]),
-            borderColor: Object.keys(counts).map(m => moodBorderColors[m]),
-            borderWidth: 1.5,
-            borderRadius: 6
+            borderRadius: 2
           }]
         },
         options: {
