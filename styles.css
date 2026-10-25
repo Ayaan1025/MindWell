@@ -262,6 +262,7 @@ input:focus { border-color: var(--accent); }
   color: var(--text-muted);
 }
 .status-line.error { color: var(--danger); }
+.status-line:empty { display: none; }
 
 /* Skeleton placeholders shown while Firestore data loads. */
 .skeleton {

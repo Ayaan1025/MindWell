@@ -191,7 +191,8 @@
     function buildCharts(entries, counts) {
 
       const sorted = [...entries].sort((a, b) => new Date(a.date) - new Date(b.date));
-      const lineLabels = sorted.map(e => e.date);
+      const lineLabels = sorted.map(e =>
+        new Date(e.date + "T00:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" }));
       const lineData = sorted.map(e => moodScore[e.mood]);
       const linePointColors = sorted.map(e => moodColors[e.mood]);
 
@@ -229,8 +230,10 @@
             y: {
               min: 0.5,
               max: 4.5,
+              // With min/max at the half steps, the default ticks land on 0.5,
+              // 1.5... and the labels came out blank. Pin them to the scores.
+              afterBuildTicks: axis => { axis.ticks = [1, 2, 3, 4].map(value => ({ value })); },
               ticks: {
-                stepSize: 1,
                 callback: val => ({ 1: "Overwhelmed", 2: "Anxious", 3: "Okay", 4: "Calm" }[val] || "")
               },
               grid: { color: gridColor },
@@ -262,7 +265,7 @@
           plugins: {
             legend: {
               position: "bottom",
-              labels: { font: { size: 12 }, padding: 12 }
+              labels: { boxWidth: 10, boxHeight: 10, padding: 12 }
             }
           }
         }
