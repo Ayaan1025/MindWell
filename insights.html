@@ -31,7 +31,13 @@
 
   <main>
     <h1>Mood Insights</h1>
-    <div id="loading" class="muted">Loading insights...</div>
+    <div id="loading" aria-busy="true" aria-label="Loading insights">
+      <div class="stat"><span class="skeleton skeleton-line"></span><span class="skeleton skeleton-line"></span><span class="skeleton skeleton-line"></span></div>
+      <div class="stat"><span class="skeleton skeleton-line"></span><span class="skeleton skeleton-line"></span><span class="skeleton skeleton-line"></span></div>
+      <div class="stat"><span class="skeleton skeleton-line"></span><span class="skeleton skeleton-line"></span><span class="skeleton skeleton-line"></span></div>
+      <div class="stat"><span class="skeleton skeleton-line"></span><span class="skeleton skeleton-line"></span><span class="skeleton skeleton-line"></span></div>
+    </div>
+    <p id="load-error" class="status-line error" hidden></p>
     <div id="stats"></div>
     <p id="streak" hidden></p>
     <p class="summary" id="summary" hidden></p>
@@ -167,7 +173,10 @@
         buildCharts(entries, counts);
 
       } catch (err) {
-        loadingEl.textContent = "Error loading insights.";
+        loadingEl.hidden = true;
+        const errorEl = document.getElementById("load-error");
+        errorEl.textContent = "Error loading insights.";
+        errorEl.hidden = false;
         console.error(err);
       }
     }

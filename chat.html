@@ -45,7 +45,11 @@
       deployed Worker URL. See <code>worker/README.md</code>.
     </div>
 
-    <div class="status muted" id="status">Connecting…</div>
+    <div class="status" id="status" aria-busy="true" aria-label="Loading">
+      <span class="skeleton skeleton-line mid"></span>
+      <span class="skeleton skeleton-line"></span>
+      <span class="skeleton skeleton-line short"></span>
+    </div>
 
     <div class="chat" id="chat">
       <div class="companion-strip">

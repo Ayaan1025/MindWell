@@ -260,6 +260,23 @@ input:focus { border-color: var(--accent); }
 }
 .status-line.error { color: var(--danger); }
 
+/* Skeleton placeholders shown while Firestore data loads. */
+.skeleton {
+  display: block;
+  border-radius: var(--radius);
+  background: var(--surface-sunk);
+  animation: skeleton-pulse 1.2s ease-in-out infinite alternate;
+}
+.skeleton-line { height: 12px; margin: 6px 0; }
+.skeleton-line.short { width: 28%; }
+.skeleton-line.mid { width: 64%; }
+.calendar-day.skeleton { border-color: transparent; min-height: 44px; }
+.stat .skeleton-line { margin: 0; }
+@keyframes skeleton-pulse {
+  from { opacity: 1; }
+  to   { opacity: 0.5; }
+}
+
 /* Mood swatch and badge, shared by the check-in, journal and insights. */
 .swatch {
   display: inline-block;

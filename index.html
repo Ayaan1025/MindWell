@@ -34,7 +34,7 @@
     <div class="calendar-head">
       <h2 id="month-label">Monthly Overview</h2>
     </div>
-    <div id="calendar"></div>
+    <div id="calendar" aria-busy="true"></div>
 
     <section class="checkin" aria-labelledby="checkin-heading">
       <h2 id="checkin-heading" class="visually-hidden">Check in</h2>
@@ -96,6 +96,28 @@
       window.location.href = "login.html";
     };
 
+    const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    function weekdayHeaders() {
+      return WEEKDAYS.map(name => {
+        const head = document.createElement("div");
+        head.className = "cal-weekday";
+        head.textContent = name;
+        return head;
+      });
+    }
+
+    // Placeholder grid shown until the month's entries arrive.
+    (function renderCalendarSkeleton() {
+      const cells = weekdayHeaders();
+      for (let i = 0; i < 35; i++) {
+        const cell = document.createElement("div");
+        cell.className = "calendar-day skeleton";
+        cells.push(cell);
+      }
+      document.getElementById("calendar").replaceChildren(...cells);
+    })();
+
     async function generateCalendar() {
       const calendar = document.getElementById("calendar");
       const now = new Date();
@@ -115,13 +137,7 @@
       snapshot.forEach(d => { moodMap[d.id] = d.data(); });
 
       // Build off-screen and swap in once, so the grid never blinks empty.
-      const cells = [];
-      ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].forEach(name => {
-        const head = document.createElement("div");
-        head.className = "cal-weekday";
-        head.textContent = name;
-        cells.push(head);
-      });
+      const cells = weekdayHeaders();
 
       for (let i = 0; i < firstDay; i++) {
         cells.push(document.createElement("div"));
@@ -152,6 +168,7 @@
 
       document.getElementById("month-label").textContent = `${monthName} ${year}`;
       calendar.replaceChildren(...cells);
+      calendar.removeAttribute("aria-busy");
     }
 
     function resetMoodSelection() {

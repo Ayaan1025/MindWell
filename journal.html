@@ -30,7 +30,12 @@
 
   <main>
     <h1>Journal History</h1>
-    <div id="loading" class="muted">Loading entries...</div>
+    <div id="loading" aria-busy="true" aria-label="Loading entries">
+      <div class="entry"><span class="skeleton skeleton-line short"></span><span class="skeleton skeleton-line"></span><span class="skeleton skeleton-line mid"></span></div>
+      <div class="entry"><span class="skeleton skeleton-line short"></span><span class="skeleton skeleton-line"></span><span class="skeleton skeleton-line mid"></span></div>
+      <div class="entry"><span class="skeleton skeleton-line short"></span><span class="skeleton skeleton-line"></span><span class="skeleton skeleton-line mid"></span></div>
+    </div>
+    <p id="load-error" class="status-line error" hidden></p>
     <p id="empty" class="muted" hidden>No journal entries yet. Head to the home page to log your first mood!</p>
     <div id="entries"></div>
   </main>
@@ -91,7 +96,10 @@
           `;
         }).join("");
       } catch(err) {
-        loadingEl.textContent = "Error loading entries.";
+        loadingEl.hidden = true;
+        const errorEl = document.getElementById("load-error");
+        errorEl.textContent = "Error loading entries.";
+        errorEl.hidden = false;
         console.error(err);
       }
     }
