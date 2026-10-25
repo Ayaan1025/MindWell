@@ -47,6 +47,9 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
+/* Class rules like .btn set display, which would otherwise beat [hidden]. */
+[hidden] { display: none !important; }
+
 body {
   margin: 0;
   min-height: 100vh;
@@ -423,6 +426,14 @@ body.overwhelmed .checkin { background: var(--overwhelmed-wash); }
   font-weight: 600;
 }
 .entry .reflection { color: var(--text-muted); white-space: pre-wrap; }
+
+.account-section {
+  margin-top: 48px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+#delete-form { max-width: 360px; }
+#delete-form input { margin-bottom: 4px; }
 
 /* --------------------------------------------------------------------------
    Insights (insights.html)

@@ -39,17 +39,43 @@
     <p id="load-error" class="status-line error" hidden></p>
     <p id="empty" class="muted" hidden>Nothing here yet. Your entries will show up after your first <a href="index.html">check-in</a>.</p>
     <div id="entries"></div>
+
+    <section class="account-section" aria-labelledby="account-heading">
+      <h2 id="account-heading">Your account</h2>
+      <p class="muted">
+        Deleting your account permanently removes every check-in and reflection, then the
+        account itself. This can't be undone.
+      </p>
+      <button type="button" class="btn btn-secondary" id="delete-start" onclick="startDelete()">Delete my account and data</button>
+
+      <form id="delete-form" hidden onsubmit="confirmDelete(event)">
+        <label for="delete-password">Enter your password to confirm</label>
+        <input type="password" id="delete-password" autocomplete="current-password" required>
+        <div class="checkin-actions">
+          <button type="submit" class="btn btn-danger" id="delete-confirm">Permanently delete everything</button>
+          <button type="button" class="link-button" onclick="cancelDelete()">Cancel</button>
+        </div>
+        <p class="status-line" id="delete-status" role="status"></p>
+      </form>
+    </section>
   </main>
 
   <footer class="site-footer">© 2026 MindWell</footer>
 
   <script type="module">
     import { auth, db } from "./firebase-config.js";
-    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import {
+      onAuthStateChanged, signOut, deleteUser,
+      reauthenticateWithCredential, EmailAuthProvider
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { collection, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // Set while an account deletion is running, so the sign-out it causes
+    // lands on the confirmation message instead of a plain login page.
+    let deleting = false;
 
     onAuthStateChanged(auth, async user => {
-      if (!user) { window.location.href = "login.html"; return; }
+      if (!user) { window.location.href = deleting ? "login.html?deleted=1" : "login.html"; return; }
       document.getElementById("user-email").textContent = user.email;
       await loadJournal(user.uid);
     });
@@ -65,6 +91,65 @@
         weekday: "long", month: "long", day: "numeric", year: "numeric"
       });
     }
+
+    /* ---- Account deletion ------------------------------------------------ */
+
+    window.startDelete = function() {
+      document.getElementById("delete-start").hidden = true;
+      document.getElementById("delete-form").hidden = false;
+      document.getElementById("delete-password").focus();
+    };
+
+    window.cancelDelete = function() {
+      document.getElementById("delete-form").hidden = true;
+      document.getElementById("delete-password").value = "";
+      document.getElementById("delete-status").textContent = "";
+      document.getElementById("delete-start").hidden = false;
+    };
+
+    window.confirmDelete = async function(event) {
+      event.preventDefault();
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const password = document.getElementById("delete-password").value;
+      const status = document.getElementById("delete-status");
+      const button = document.getElementById("delete-confirm");
+      button.disabled = true;
+      status.classList.remove("error");
+      status.textContent = "Deleting…";
+
+      try {
+        // Re-authenticate first. deleteUser requires a recent sign-in, and
+        // checking up front means a wrong password can't leave the account
+        // in place with its entries already gone.
+        await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, password));
+
+        // Remove users/{uid}/moods, then the auth user. Batches cap at 500 writes.
+        const snapshot = await getDocs(collection(db, "users", user.uid, "moods"));
+        for (let i = 0; i < snapshot.docs.length; i += 500) {
+          const batch = writeBatch(db);
+          snapshot.docs.slice(i, i + 500).forEach(d => batch.delete(d.ref));
+          await batch.commit();
+        }
+
+        deleting = true;
+        await deleteUser(user);
+        window.location.href = "login.html?deleted=1";
+      } catch (e) {
+        console.error(e);
+        deleting = false;
+        button.disabled = false;
+        status.classList.add("error");
+        if (e.code === "auth/wrong-password" || e.code === "auth/invalid-credential") {
+          status.textContent = "That password isn't right. Nothing was deleted.";
+        } else if (e.code === "auth/too-many-requests") {
+          status.textContent = "Too many attempts. Wait a few minutes and try again. Nothing was deleted.";
+        } else {
+          status.textContent = "Something went wrong partway through. Try again, and if it keeps failing, email privacy@mindwell.example.";
+        }
+      }
+    };
 
     async function loadJournal(uid) {
       const entriesDiv = document.getElementById("entries");

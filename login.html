@@ -20,6 +20,7 @@
   <main class="auth-main">
     <div class="auth-card">
       <h1 id="auth-heading">Welcome back</h1>
+      <p class="status-line" id="auth-notice" role="status"></p>
       <div class="tabs" role="tablist">
         <button type="button" class="tab" role="tab" id="tab-login" aria-selected="true" aria-controls="form-login" onclick="switchTab('login')">Log in</button>
         <button type="button" class="tab" role="tab" id="tab-signup" aria-selected="false" aria-controls="form-signup" onclick="switchTab('signup')">Sign up</button>
@@ -59,6 +60,11 @@
     onAuthStateChanged(auth, user => {
       if (user) { window.location.href = "index.html"; return; }
     });
+
+    if (new URLSearchParams(location.search).has("deleted")) {
+      document.getElementById("auth-notice").textContent =
+        "Your account and all of your entries have been deleted.";
+    }
 
     window.switchTab = function(tab) {
       document.getElementById("tab-login").setAttribute("aria-selected", String(tab === "login"));
