@@ -27,6 +27,6 @@ FALLBACK_MODEL = "llama-3.1-8b-instant"
 # Worker checks on every incoming ID token.
 FIREBASE_PROJECT_ID = "mindwell---it390"
 
-# Lock this to your deployed origin before going public. "*" is fine only
-# while testing from 127.0.0.1.
-ALLOWED_ORIGIN = "*"
+# Only the live Vercel site may read replies from a browser. Set it back to
+# "*" (and redeploy) to test the Companion from localhost.
+ALLOWED_ORIGIN = "https://mind-well-it-390.vercel.app"

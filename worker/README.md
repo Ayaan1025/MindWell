@@ -67,7 +67,7 @@ While testing, `ALLOWED_ORIGIN = "*"` is fine. Once deployed, set it in
 `wrangler.toml` to your real origin and redeploy:
 
 ```toml
-ALLOWED_ORIGIN = "https://ayaan1025.github.io"
+ALLOWED_ORIGIN = "https://mind-well-it-390.vercel.app"
 ```
 
 ---
